@@ -41,6 +41,7 @@ The first release supports:
 - changed-model detection from a Git diff
 - table- and selected column-level lineage
 - schema compatibility checks
+- conservative, advisory model and column rename candidates
 - sampled before/after execution with DuckDB
 - row-count, null-rate, and distribution comparisons
 - Markdown and JSON reports
@@ -131,6 +132,8 @@ Use the movable `v0` tag for backwards-compatible v0 updates, an exact release s
 ## Finding trust
 
 Every finding is labeled `observed`, `derived`, or `inferred`, with a confidence value and explicit analysis coverage. Missing SQL, unsupported parsing, or absent sample pairs cannot silently become a clean result. See the [versioned result format](docs/result-format.md).
+
+Rename candidates are deliberately advisory. DataPR emits them only for unambiguous pairs supported by identical model fingerprints and schemas, or by identical parsed projection expressions and declared types. It continues to report the underlying removal as breaking until teams confirm the migration is safe.
 
 ## What DataPR is not
 
