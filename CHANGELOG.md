@@ -4,6 +4,11 @@ All notable changes to DataPR are documented here. The project uses semantic ver
 
 ## [Unreleased]
 
+### Added
+
+- a manual workflow that pilots the published v0.4.0 Action from a clean checkout and preserves synthetic evidence
+- a production rollout, promotion-gate, and rollback runbook for controlled adoption
+
 ## [0.4.0] - 2026-08-30
 
 ### Added

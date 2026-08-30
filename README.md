@@ -20,7 +20,7 @@ orders  MODIFIED
 ```
 
 > [!IMPORTANT]
-> DataPR v0.4 is an adoption-evidence release candidate. It is usable on real dbt artifacts, but pre-1.0 interfaces may evolve from adopter feedback.
+> DataPR v0.4 is published and in controlled rollout. Pin `v0.4.0` for pilots; movable `v0` remains on v0.3.0 until the production-promotion gates pass.
 
 ## Why DataPR?
 
@@ -138,6 +138,8 @@ Rename candidates are deliberately advisory. DataPR emits them only for unambigu
 Untrusted artifacts fail closed against documented manifest and profiling limits. See [resource limits](docs/resource-limits.md) for defaults, configuration, and residual risks. SQL compatibility is backed by a [50-query dialect corpus](docs/dialect-support.md).
 
 Adopters can run `datapr measure` to create a local aggregate of analysis time, finding counts, and coverage without paths, model names, SQL, or raw values. See the [adopter-validation protocol](docs/adopter-validation.md) before sharing any output.
+
+Production pilots should follow the [rollout and rollback runbook](docs/production-rollout.md), beginning in advisory mode with the immutable `v0.4.0` tag.
 
 ## What DataPR is not
 

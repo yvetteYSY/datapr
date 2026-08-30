@@ -34,6 +34,17 @@ class ReleaseTest(unittest.TestCase):
             self.assertIn("yvetteYSY/datapr@v0", contents)
             self.assertNotIn("yvetteYSY/datapr@main", contents)
 
+    def test_pilot_uses_immutable_release_with_bounded_permissions(self) -> None:
+        workflow = (ROOT / ".github/workflows/release-pilot.yml").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("uses: yvetteYSY/datapr@v0.4.0", workflow)
+        self.assertNotIn("uses: yvetteYSY/datapr@v0\n", workflow)
+        self.assertIn("contents: read", workflow)
+        self.assertIn('enforce: "false"', workflow)
+        self.assertIn("timeout-minutes: 10", workflow)
+        self.assertIn("retention-days: 14", workflow)
+
 
 if __name__ == "__main__":
     unittest.main()
