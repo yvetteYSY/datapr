@@ -1,4 +1,5 @@
 import json
+from collections import Counter
 from pathlib import Path
 import unittest
 
@@ -41,8 +42,14 @@ class LineageTest(unittest.TestCase):
 
     def test_dialect_capability_matrix(self) -> None:
         cases = json.loads((FIXTURES / "dialects" / "cases.json").read_text())
+        self.assertEqual(50, len(cases))
+        self.assertEqual(
+            {"bigquery": 10, "snowflake": 10, "spark": 10, "postgres": 10, "duckdb": 10},
+            dict(Counter(case["dialect"] for case in cases)),
+        )
+        self.assertEqual(len(cases), len({case["id"] for case in cases}))
         for case in cases:
-            with self.subTest(dialect=case["dialect"]):
+            with self.subTest(case=case["id"]):
                 base = load_manifest_text(
                     json.dumps(
                         {

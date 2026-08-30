@@ -4,6 +4,13 @@ All notable changes to DataPR are documented here. The project uses semantic ver
 
 ## [Unreleased]
 
+### Added
+
+- a 50-query dialect corpus with ten exact lineage cases each for BigQuery, Snowflake, Spark, Postgres, and DuckDB
+- fail-closed manifest limits for bytes, nodes, columns, SQL length, nesting, and malformed structures
+- configurable profiling limits for samples, models, file bytes, columns, and DuckDB memory
+- resource-limit coverage metadata, stress tests, security guidance, and architecture decisions
+
 ## [0.2.0] - 2026-08-30
 
 ### Added

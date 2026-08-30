@@ -5,6 +5,7 @@ import tempfile
 import unittest
 
 from datapr.git import GitError, manifests_from_range, parse_range
+from datapr.manifest import ManifestLimits
 
 
 def _run(repo: Path, *args: str) -> None:
@@ -53,6 +54,26 @@ class GitTest(unittest.TestCase):
 
         self.assertEqual("v1", base.models["model.demo.orders"].fingerprint)
         self.assertEqual("v2", head.models["model.demo.orders"].fingerprint)
+
+    def test_rejects_large_git_object_before_loading_it(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            repo = Path(directory)
+            artifact = repo / "artifacts" / "manifest.json"
+            artifact.parent.mkdir()
+            _run(repo, "git", "init", "-b", "main")
+            _run(repo, "git", "config", "user.name", "DataPR Test")
+            _run(repo, "git", "config", "user.email", "test@datapr.dev")
+            artifact.write_text(_manifest("v1"), encoding="utf-8")
+            _run(repo, "git", "add", ".")
+            _run(repo, "git", "commit", "-m", "base")
+
+            with self.assertRaisesRegex(GitError, "limit is 10"):
+                manifests_from_range(
+                    "main..main",
+                    "artifacts/manifest.json",
+                    repo,
+                    limits=ManifestLimits(max_bytes=10),
+                )
 
 
 if __name__ == "__main__":

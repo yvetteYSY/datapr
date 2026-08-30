@@ -1,14 +1,14 @@
 # SQL dialect support
 
-DataPR uses the dbt manifest's `metadata.adapter_type` to select a SQLGlot parser dialect. The current fixture matrix verifies common projection lineage for five adapters.
+DataPR uses the dbt manifest's `metadata.adapter_type` to select a SQLGlot parser dialect. The current fixture matrix verifies 50 representative projection-lineage queries across five adapters.
 
-| dbt adapter | Tested constructs | Column lineage | Risk heuristics |
+| dbt adapter | Cases | Tested constructs | Expected lineage |
 |---|---|---:|---:|
-| BigQuery | backtick identifiers, `SAFE_CAST`, `QUALIFY`, window functions | Fixture-backed | Supported |
-| Snowflake | `IFF`, `QUALIFY`, window functions | Fixture-backed | Supported |
-| Spark | casts and `EXPLODE` projections | Fixture-backed | Supported |
-| Postgres | JSON text extraction with `->>` | Fixture-backed | Supported |
-| DuckDB | list functions and standard projections | Fixture-backed | Supported |
+| BigQuery | 10 | backticks, `SAFE_CAST`, `QUALIFY`, arrays, dates, regex, CTEs, windows | 10/10 exact |
+| Snowflake | 10 | `IFF`, `QUALIFY`, objects, `LISTAGG`, dates, regex, CTEs, windows | 10/10 exact |
+| Spark | 10 | casts, `EXPLODE`, arrays, JSON, dates, regex, CTEs, windows | 10/10 exact |
+| Postgres | 10 | JSON operators, arrays, dates, regex, CTEs, windows | 10/10 exact |
+| DuckDB | 10 | lists, JSON, dates, regex, CTEs, windows | 10/10 exact |
 
 “Fixture-backed” means the checked-in examples parse and produce expected source-column mappings. It does not imply complete support for every construct in that dialect.
 
@@ -23,4 +23,4 @@ DataPR uses the dbt manifest's `metadata.adapter_type` to select a SQLGlot parse
 
 Add a compact, representative query and expected mapping to [`tests/fixtures/dialects/cases.json`](../tests/fixtures/dialects/cases.json). Prefer constructs observed in a real project. A fixture should identify the smallest unsupported syntax rather than copy production SQL or sensitive identifiers.
 
-The v0.2 target is at least 50 representative queries across these adapters, with incomplete-coverage and false-positive rates reported alongside the count.
+The v0.3 corpus contains 50/50 parsing successes and 50/50 exact expected mappings. This is curated compatibility evidence, not a production precision estimate. False-positive and incomplete-coverage rates still require adopter manifests.

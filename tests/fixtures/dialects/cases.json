@@ -1,42 +1,302 @@
 [
   {
+    "id": "bigquery-safe-cast-qualify",
     "dialect": "bigquery",
     "sql": "select safe_cast(o.customer_id as string) as customer_id, o.total from `analytics.orders` as o qualify row_number() over (partition by o.customer_id order by o.created_at desc) = 1",
-    "expected": {
-      "customer_id": ["o.customer_id"],
-      "total": ["o.total"]
-    }
+    "expected": {"customer_id": ["o.customer_id"], "total": ["o.total"]}
   },
   {
+    "id": "bigquery-ifnull",
+    "dialect": "bigquery",
+    "sql": "select ifnull(o.discount, 0) as discount from `analytics.orders` o",
+    "expected": {"discount": ["o.discount"]}
+  },
+  {
+    "id": "bigquery-array-length",
+    "dialect": "bigquery",
+    "sql": "select array_length(o.items) as item_count from `analytics.orders` o",
+    "expected": {"item_count": ["o.items"]}
+  },
+  {
+    "id": "bigquery-date-trunc",
+    "dialect": "bigquery",
+    "sql": "select date_trunc(o.created_at, month) as order_month from `analytics.orders` o",
+    "expected": {"order_month": ["o.created_at"]}
+  },
+  {
+    "id": "bigquery-case",
+    "dialect": "bigquery",
+    "sql": "select case when o.status = 'paid' then o.total else 0 end as paid_total from `analytics.orders` o",
+    "expected": {"paid_total": ["o.status", "o.total"]}
+  },
+  {
+    "id": "bigquery-window-sum",
+    "dialect": "bigquery",
+    "sql": "select o.customer_id, sum(o.total) over (partition by o.customer_id) as lifetime_total from `analytics.orders` o",
+    "expected": {"customer_id": ["o.customer_id"], "lifetime_total": ["o.customer_id", "o.total"]}
+  },
+  {
+    "id": "bigquery-cte-arithmetic",
+    "dialect": "bigquery",
+    "sql": "with base as (select customer_id, total from `analytics.orders`) select b.customer_id, b.total * 100 as cents from base b",
+    "expected": {"customer_id": ["b.customer_id"], "cents": ["b.total"]}
+  },
+  {
+    "id": "bigquery-regexp-extract",
+    "dialect": "bigquery",
+    "sql": "select regexp_extract(o.email, r'@(.+)$') as domain from `analytics.orders` o",
+    "expected": {"domain": ["o.email"]}
+  },
+  {
+    "id": "bigquery-coalesce",
+    "dialect": "bigquery",
+    "sql": "select coalesce(o.shipping_city, o.billing_city) as city from `analytics.orders` o",
+    "expected": {"city": ["o.billing_city", "o.shipping_city"]}
+  },
+  {
+    "id": "bigquery-timestamp-diff",
+    "dialect": "bigquery",
+    "sql": "select timestamp_diff(o.updated_at, o.created_at, hour) as age_hours from `analytics.orders` o",
+    "expected": {"age_hours": ["o.created_at", "o.updated_at"]}
+  },
+  {
+    "id": "snowflake-iff-qualify",
     "dialect": "snowflake",
     "sql": "select o.customer_id, iff(o.total > 0, o.total, 0) as net_total from analytics.orders as o qualify row_number() over (partition by o.customer_id order by o.created_at desc) = 1",
-    "expected": {
-      "customer_id": ["o.customer_id"],
-      "net_total": ["o.total"]
-    }
+    "expected": {"customer_id": ["o.customer_id"], "net_total": ["o.total"]}
   },
   {
+    "id": "snowflake-zeroifnull",
+    "dialect": "snowflake",
+    "sql": "select zeroifnull(o.discount) as discount from analytics.orders o",
+    "expected": {"discount": ["o.discount"]}
+  },
+  {
+    "id": "snowflake-date-trunc",
+    "dialect": "snowflake",
+    "sql": "select date_trunc('month', o.created_at) as order_month from analytics.orders o",
+    "expected": {"order_month": ["o.created_at"]}
+  },
+  {
+    "id": "snowflake-object-get",
+    "dialect": "snowflake",
+    "sql": "select object_get(o.payload, 'status')::string as status from analytics.orders o",
+    "expected": {"status": ["o.payload"]}
+  },
+  {
+    "id": "snowflake-listagg",
+    "dialect": "snowflake",
+    "sql": "select listagg(o.item_name, ',') within group (order by o.item_name) as items from analytics.order_items o",
+    "expected": {"items": ["o.item_name"]}
+  },
+  {
+    "id": "snowflake-window-sum",
+    "dialect": "snowflake",
+    "sql": "select o.customer_id, sum(o.total) over (partition by o.customer_id) as lifetime_total from analytics.orders o",
+    "expected": {"customer_id": ["o.customer_id"], "lifetime_total": ["o.customer_id", "o.total"]}
+  },
+  {
+    "id": "snowflake-cte-arithmetic",
+    "dialect": "snowflake",
+    "sql": "with base as (select customer_id, total from analytics.orders) select b.customer_id, b.total * 100 as cents from base b",
+    "expected": {"customer_id": ["b.customer_id"], "cents": ["b.total"]}
+  },
+  {
+    "id": "snowflake-regexp-substr",
+    "dialect": "snowflake",
+    "sql": "select regexp_substr(o.email, '@(.+)$', 1, 1, 'e', 1) as domain from analytics.orders o",
+    "expected": {"domain": ["o.email"]}
+  },
+  {
+    "id": "snowflake-coalesce",
+    "dialect": "snowflake",
+    "sql": "select coalesce(o.shipping_city, o.billing_city) as city from analytics.orders o",
+    "expected": {"city": ["o.billing_city", "o.shipping_city"]}
+  },
+  {
+    "id": "snowflake-datediff",
+    "dialect": "snowflake",
+    "sql": "select datediff('hour', o.created_at, o.updated_at) as age_hours from analytics.orders o",
+    "expected": {"age_hours": ["o.created_at", "o.updated_at"]}
+  },
+  {
+    "id": "spark-cast-explode",
     "dialect": "spark",
     "sql": "select cast(o.customer_id as string) as customer_id, explode(o.items) as item from analytics.orders as o",
-    "expected": {
-      "customer_id": ["o.customer_id"],
-      "item": ["o.items"]
-    }
+    "expected": {"customer_id": ["o.customer_id"], "item": ["o.items"]}
   },
   {
+    "id": "spark-nvl",
+    "dialect": "spark",
+    "sql": "select nvl(o.discount, 0) as discount from analytics.orders o",
+    "expected": {"discount": ["o.discount"]}
+  },
+  {
+    "id": "spark-date-trunc",
+    "dialect": "spark",
+    "sql": "select date_trunc('month', o.created_at) as order_month from analytics.orders o",
+    "expected": {"order_month": ["o.created_at"]}
+  },
+  {
+    "id": "spark-json-get",
+    "dialect": "spark",
+    "sql": "select get_json_object(o.payload, '$.status') as status from analytics.orders o",
+    "expected": {"status": ["o.payload"]}
+  },
+  {
+    "id": "spark-array-size",
+    "dialect": "spark",
+    "sql": "select size(o.items) as item_count from analytics.orders o",
+    "expected": {"item_count": ["o.items"]}
+  },
+  {
+    "id": "spark-window-sum",
+    "dialect": "spark",
+    "sql": "select o.customer_id, sum(o.total) over (partition by o.customer_id) as lifetime_total from analytics.orders o",
+    "expected": {"customer_id": ["o.customer_id"], "lifetime_total": ["o.customer_id", "o.total"]}
+  },
+  {
+    "id": "spark-cte-arithmetic",
+    "dialect": "spark",
+    "sql": "with base as (select customer_id, total from analytics.orders) select b.customer_id, b.total * 100 as cents from base b",
+    "expected": {"customer_id": ["b.customer_id"], "cents": ["b.total"]}
+  },
+  {
+    "id": "spark-regexp-extract",
+    "dialect": "spark",
+    "sql": "select regexp_extract(o.email, '@(.+)$', 1) as domain from analytics.orders o",
+    "expected": {"domain": ["o.email"]}
+  },
+  {
+    "id": "spark-coalesce",
+    "dialect": "spark",
+    "sql": "select coalesce(o.shipping_city, o.billing_city) as city from analytics.orders o",
+    "expected": {"city": ["o.billing_city", "o.shipping_city"]}
+  },
+  {
+    "id": "spark-datediff",
+    "dialect": "spark",
+    "sql": "select datediff(o.delivered_at, o.created_at) as delivery_days from analytics.orders o",
+    "expected": {"delivery_days": ["o.created_at", "o.delivered_at"]}
+  },
+  {
+    "id": "postgres-json-text",
     "dialect": "postgres",
     "sql": "select o.customer_id, o.payload ->> 'status' as status from analytics.orders as o",
-    "expected": {
-      "customer_id": ["o.customer_id"],
-      "status": ["o.payload"]
-    }
+    "expected": {"customer_id": ["o.customer_id"], "status": ["o.payload"]}
   },
   {
+    "id": "postgres-coalesce",
+    "dialect": "postgres",
+    "sql": "select coalesce(o.discount, 0) as discount from analytics.orders o",
+    "expected": {"discount": ["o.discount"]}
+  },
+  {
+    "id": "postgres-date-trunc",
+    "dialect": "postgres",
+    "sql": "select date_trunc('month', o.created_at) as order_month from analytics.orders o",
+    "expected": {"order_month": ["o.created_at"]}
+  },
+  {
+    "id": "postgres-json-path",
+    "dialect": "postgres",
+    "sql": "select o.payload #>> '{customer,id}' as customer_key from analytics.orders o",
+    "expected": {"customer_key": ["o.payload"]}
+  },
+  {
+    "id": "postgres-array-length",
+    "dialect": "postgres",
+    "sql": "select array_length(o.items, 1) as item_count from analytics.orders o",
+    "expected": {"item_count": ["o.items"]}
+  },
+  {
+    "id": "postgres-window-sum",
+    "dialect": "postgres",
+    "sql": "select o.customer_id, sum(o.total) over (partition by o.customer_id) as lifetime_total from analytics.orders o",
+    "expected": {"customer_id": ["o.customer_id"], "lifetime_total": ["o.customer_id", "o.total"]}
+  },
+  {
+    "id": "postgres-cte-arithmetic",
+    "dialect": "postgres",
+    "sql": "with base as (select customer_id, total from analytics.orders) select b.customer_id, b.total * 100 as cents from base b",
+    "expected": {"customer_id": ["b.customer_id"], "cents": ["b.total"]}
+  },
+  {
+    "id": "postgres-substring-regex",
+    "dialect": "postgres",
+    "sql": "select substring(o.email from '@(.+)$') as domain from analytics.orders o",
+    "expected": {"domain": ["o.email"]}
+  },
+  {
+    "id": "postgres-case",
+    "dialect": "postgres",
+    "sql": "select case when o.status = 'paid' then o.total else 0 end as paid_total from analytics.orders o",
+    "expected": {"paid_total": ["o.status", "o.total"]}
+  },
+  {
+    "id": "postgres-extract-epoch",
+    "dialect": "postgres",
+    "sql": "select extract(epoch from (o.updated_at - o.created_at)) as age_seconds from analytics.orders o",
+    "expected": {"age_seconds": ["o.created_at", "o.updated_at"]}
+  },
+  {
+    "id": "duckdb-list-sum",
     "dialect": "duckdb",
     "sql": "select o.customer_id, list_sum(o.amounts) as total from analytics.orders as o",
-    "expected": {
-      "customer_id": ["o.customer_id"],
-      "total": ["o.amounts"]
-    }
+    "expected": {"customer_id": ["o.customer_id"], "total": ["o.amounts"]}
+  },
+  {
+    "id": "duckdb-coalesce",
+    "dialect": "duckdb",
+    "sql": "select coalesce(o.discount, 0) as discount from analytics.orders o",
+    "expected": {"discount": ["o.discount"]}
+  },
+  {
+    "id": "duckdb-date-trunc",
+    "dialect": "duckdb",
+    "sql": "select date_trunc('month', o.created_at) as order_month from analytics.orders o",
+    "expected": {"order_month": ["o.created_at"]}
+  },
+  {
+    "id": "duckdb-json-extract",
+    "dialect": "duckdb",
+    "sql": "select json_extract_string(o.payload, '$.status') as status from analytics.orders o",
+    "expected": {"status": ["o.payload"]}
+  },
+  {
+    "id": "duckdb-list-length",
+    "dialect": "duckdb",
+    "sql": "select len(o.items) as item_count from analytics.orders o",
+    "expected": {"item_count": ["o.items"]}
+  },
+  {
+    "id": "duckdb-window-sum",
+    "dialect": "duckdb",
+    "sql": "select o.customer_id, sum(o.total) over (partition by o.customer_id) as lifetime_total from analytics.orders o",
+    "expected": {"customer_id": ["o.customer_id"], "lifetime_total": ["o.customer_id", "o.total"]}
+  },
+  {
+    "id": "duckdb-cte-arithmetic",
+    "dialect": "duckdb",
+    "sql": "with base as (select customer_id, total from analytics.orders) select b.customer_id, b.total * 100 as cents from base b",
+    "expected": {"customer_id": ["b.customer_id"], "cents": ["b.total"]}
+  },
+  {
+    "id": "duckdb-regexp-extract",
+    "dialect": "duckdb",
+    "sql": "select regexp_extract(o.email, '@(.+)$', 1) as domain from analytics.orders o",
+    "expected": {"domain": ["o.email"]}
+  },
+  {
+    "id": "duckdb-case",
+    "dialect": "duckdb",
+    "sql": "select case when o.status = 'paid' then o.total else 0 end as paid_total from analytics.orders o",
+    "expected": {"paid_total": ["o.status", "o.total"]}
+  },
+  {
+    "id": "duckdb-date-diff",
+    "dialect": "duckdb",
+    "sql": "select date_diff('hour', o.created_at, o.updated_at) as age_hours from analytics.orders o",
+    "expected": {"age_hours": ["o.created_at", "o.updated_at"]}
   }
 ]

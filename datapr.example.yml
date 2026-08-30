@@ -6,6 +6,12 @@ execution:
   sample_strategy: hash
   # Change the seed to obtain a different reproducible sample.
   sample_seed: 0
+  # Fail closed when inputs exceed local-review resource boundaries.
+  max_sample_rows: 1000000
+  max_profile_models: 100
+  max_profile_file_bytes: 1073741824
+  max_profile_columns: 1000
+  memory_limit_mb: 512
   # Optional directories containing <model>.parquet, <model>.csv, or <model>.json.
   # base_data_dir: .datapr/base
   # head_data_dir: .datapr/head

@@ -33,6 +33,34 @@ class ProfileError(ValueError):
     """Raised when configured differential profiling cannot run."""
 
 
+def _validate_execution_limits(execution: ExecutionConfig) -> None:
+    positive_limits = {
+        "sample_rows": execution.sample_rows,
+        "max_sample_rows": execution.max_sample_rows,
+        "max_profile_models": execution.max_profile_models,
+        "max_profile_file_bytes": execution.max_profile_file_bytes,
+        "max_profile_columns": execution.max_profile_columns,
+        "memory_limit_mb": execution.memory_limit_mb,
+    }
+    invalid = [name for name, value in positive_limits.items() if value <= 0]
+    if invalid:
+        raise ProfileError(f"execution limits must be positive: {', '.join(invalid)}")
+    if execution.sample_rows > execution.max_sample_rows:
+        raise ProfileError("sample_rows cannot exceed max_sample_rows")
+
+
+def _validate_profile_input(path: Path, execution: ExecutionConfig) -> None:
+    try:
+        size = path.stat().st_size
+    except OSError as exc:
+        raise ProfileError(f"cannot inspect profile input {path}: {exc}") from exc
+    if size > execution.max_profile_file_bytes:
+        raise ProfileError(
+            f"profile input {path} is {size:,} bytes; limit is "
+            f"{execution.max_profile_file_bytes:,}"
+        )
+
+
 def _reader(path: Path) -> str:
     if path.suffix == ".parquet":
         return "read_parquet(?)"
@@ -152,6 +180,9 @@ def _profile_pair(
     connection = duckdb.connect(":memory:")
     try:
         connection.execute("SET threads = 1")
+        connection.execute(
+            f"SET memory_limit = '{execution.memory_limit_mb}MB'"
+        )
         base_count = _row_count(connection, base_path)
         head_count = _row_count(connection, head_path)
         row_change = _percent_change(float(base_count), float(head_count))
@@ -182,6 +213,16 @@ def _profile_pair(
 
         base_schema = _schema(connection, base_path)
         head_schema = _schema(connection, head_path)
+        if len(base_schema) > execution.max_profile_columns:
+            raise ProfileError(
+                f"profile input {base_path} contains {len(base_schema):,} columns; "
+                f"limit is {execution.max_profile_columns:,}"
+            )
+        if len(head_schema) > execution.max_profile_columns:
+            raise ProfileError(
+                f"profile input {head_path} contains {len(head_schema):,} columns; "
+                f"limit is {execution.max_profile_columns:,}"
+            )
         shared_columns = sorted(base_schema.keys() & head_schema.keys())
         sampling_evidence = {
             "sample_rows": execution.sample_rows,
@@ -284,6 +325,7 @@ def add_profile_findings(
     execution: ExecutionConfig,
     policy: PolicyConfig,
 ) -> Comparison:
+    _validate_execution_limits(execution)
     if not execution.base_data_dir and not execution.head_data_dir:
         return result
     if not execution.base_data_dir or not execution.head_data_dir:
@@ -292,16 +334,27 @@ def add_profile_findings(
     if not base_dir.is_dir() or not head_dir.is_dir():
         raise ProfileError("configured base and head data directories must exist")
 
+    eligible_changes = [
+        change
+        for change in result.changes
+        if change.kind not in {"added", "removed"}
+    ]
+    if len(eligible_changes) > execution.max_profile_models:
+        raise ProfileError(
+            f"comparison contains {len(eligible_changes):,} profile-eligible models; "
+            f"limit is {execution.max_profile_models:,}"
+        )
+
     findings = list(result.findings)
     profiled, missing = 0, []
-    for change in result.changes:
-        if change.kind == "added" or change.kind == "removed":
-            continue
+    for change in eligible_changes:
         base_file = _find_model_file(base_dir, change.name)
         head_file = _find_model_file(head_dir, change.name)
         if not base_file or not head_file:
             missing.append(change.name)
             continue
+        _validate_profile_input(base_file, execution)
+        _validate_profile_input(head_file, execution)
         findings.extend(
             _profile_pair(change.name, base_file, head_file, execution, policy)
         )
@@ -319,6 +372,10 @@ def add_profile_findings(
             "md5-json-v1" if execution.sample_strategy == "hash" else None
         ),
         profile_threads=1,
+        profile_memory_limit_mb=execution.memory_limit_mb,
+        max_profile_file_bytes=execution.max_profile_file_bytes,
+        max_profile_columns=execution.max_profile_columns,
+        max_profile_models=execution.max_profile_models,
         complete=bool(coverage.get("complete", True)) and not missing,
     )
     return replace(result, findings=tuple(findings), coverage=coverage)

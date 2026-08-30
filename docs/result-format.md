@@ -25,6 +25,8 @@ Every finding declares its provenance:
 
 When differential profiling runs, coverage includes `sample_rows`, `sample_strategy`, `sample_seed`, `sample_hash`, and `profile_threads`. Hash-sampled profile findings also carry the strategy, seed, and sorted `sample_columns` in their evidence. `sample_hash: md5-json-v1` identifies the canonical shared-column row representation; it is a reproducibility contract, not a cryptographic security claim.
 
+Profiling coverage also records the applied memory, file-size, column-count, and model-count boundaries. Exceeding a boundary raises a controlled error instead of emitting a partial result, so consumers never interpret resource exhaustion as complete evidence.
+
 ## Compatibility
 
 Within major schema version 1, fields may be added but existing meanings will not change. Consumers should ignore unknown fields. A future breaking contract will use a new schema file and major `schema_version`.
