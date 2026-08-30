@@ -1,0 +1,63 @@
+name: Published release pilot
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  published-release-pilot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Start clean-checkout timer
+        id: start
+        shell: bash
+        run: echo "epoch=$(date +%s)" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v6
+      - name: Run published DataPR Action
+        id: datapr
+        uses: yvetteYSY/datapr@v0.4.0
+        with:
+          base-manifest: tests/fixtures/base_manifest.json
+          head-manifest: tests/fixtures/head_manifest.json
+          enforce: "false"
+      - name: Verify report and privacy-safe measurement
+        id: verify
+        shell: bash
+        env:
+          DATAPR_EXIT_CODE: ${{ steps.datapr.outputs.exit-code }}
+          REPORT_PATH: ${{ steps.datapr.outputs.report-path }}
+          START_EPOCH: ${{ steps.start.outputs.epoch }}
+        run: |
+          test "$DATAPR_EXIT_CODE" = "1"
+          test -f "$REPORT_PATH"
+          grep -q "DataPR: FAIL" "$REPORT_PATH"
+          measurement_path="$RUNNER_TEMP/datapr-measurement.json"
+          datapr measure \
+            --base-manifest tests/fixtures/base_manifest.json \
+            --head-manifest tests/fixtures/head_manifest.json \
+            --out "$measurement_path"
+          python -m json.tool "$measurement_path" >/dev/null
+          if grep -Eqi 'orders|customer_id|base_manifest|head_manifest' "$measurement_path"; then
+            echo "measurement contains a fixture identifier" >&2
+            exit 1
+          fi
+          elapsed_seconds=$(($(date +%s) - START_EPOCH))
+          echo "elapsed-seconds=$elapsed_seconds" >> "$GITHUB_OUTPUT"
+          {
+            echo "## DataPR v0.4.0 published-release pilot"
+            echo
+            echo "- Clean-checkout time to verified report: ${elapsed_seconds}s"
+            echo "- Expected policy exit code observed: ${DATAPR_EXIT_CODE}"
+            echo "- Privacy-safe measurement parsed successfully"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Preserve synthetic pilot evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: datapr-v0.4.0-pilot-evidence
+          path: |
+            ${{ steps.datapr.outputs.report-path }}
+            ${{ runner.temp }}/datapr-measurement.json
+          retention-days: 14

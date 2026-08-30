@@ -14,7 +14,7 @@ This roadmap prioritizes evidence that DataPR is useful in real pull-request wor
 - reusable GitHub Action with update-in-place PR comments
 - versioned result schema and explicit coverage
 
-## Now: v0.4 release candidate and adoption evidence
+## Now: v0.4 controlled rollout and adoption evidence
 
 ### Dogfood workflow
 
@@ -42,6 +42,8 @@ This roadmap prioritizes evidence that DataPR is useful in real pull-request wor
 
 - [x] Create a `v0.1.0` GitHub release and movable `v0` action tag.
 - [x] Release trust-hardened `v0.3.0` and move the compatible `v0` action tag.
+- [x] Publish immutable `v0.4.0` while keeping movable `v0` on the pilot-safe baseline.
+- [x] Add a published-release pilot workflow and production rollout/rollback runbook.
 - Record a two-minute demo and add an animated README preview.
 - [x] Add privacy-aware issue and pull-request templates.
 - [x] Publish labeled good-first issues with bounded acceptance criteria ([#11](https://github.com/yvetteYSY/datapr/issues/11), [#12](https://github.com/yvetteYSY/datapr/issues/12), [#13](https://github.com/yvetteYSY/datapr/issues/13)).

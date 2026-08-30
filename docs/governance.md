@@ -13,7 +13,7 @@
 
 The rules apply to administrators. The required approval count is currently zero because DataPR has one maintainer; requiring an independent approval would prevent routine maintenance. Once a second active maintainer exists, the target state is one approval plus last-pusher separation.
 
-The intentionally failing [dogfood PR #1](https://github.com/yvetteYSY/datapr/pull/1) is not a merge candidate. It exists to demonstrate policy enforcement and should remain unmerged.
+The intentionally failing [dogfood PR #1](https://github.com/yvetteYSY/datapr/pull/1) was archived without merge after demonstrating policy enforcement. Its generated report remains historical validation evidence.
 
 ## Change discipline
 
