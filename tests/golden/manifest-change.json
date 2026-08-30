@@ -1,0 +1,95 @@
+{
+  "schema_version": "1.0",
+  "base_manifest": "tests/fixtures/base_manifest.json",
+  "head_manifest": "tests/fixtures/head_manifest.json",
+  "models_base": 3,
+  "models_head": 3,
+  "changes": [
+    {
+      "unique_id": "model.demo.orders",
+      "name": "orders",
+      "kind": "modified",
+      "columns": [
+        {
+          "column": "customer_id",
+          "kind": "type_changed",
+          "before": "bigint",
+          "after": "varchar"
+        },
+        {
+          "column": "order_status",
+          "kind": "added",
+          "before": null,
+          "after": "varchar"
+        }
+      ],
+      "downstream": ["daily_revenue"]
+    }
+  ],
+  "findings": [
+    {
+      "id": "model.modified",
+      "severity": "info",
+      "model": "orders",
+      "message": "Model SQL, dependencies, or declared schema changed.",
+      "confidence": 1.0,
+      "provenance": "derived",
+      "evidence": {}
+    },
+    {
+      "id": "schema.incompatible_type_change",
+      "severity": "high",
+      "model": "orders",
+      "message": "Column `customer_id` changed type from `bigint` to `varchar`.",
+      "confidence": 1.0,
+      "provenance": "derived",
+      "evidence": {
+        "column": "customer_id",
+        "before": "bigint",
+        "after": "varchar"
+      }
+    },
+    {
+      "id": "schema.added_column",
+      "severity": "low",
+      "model": "orders",
+      "message": "Column `order_status` was added.",
+      "confidence": 1.0,
+      "provenance": "derived",
+      "evidence": {
+        "column": "order_status",
+        "before": null,
+        "after": "varchar"
+      }
+    },
+    {
+      "id": "lineage.downstream_impact",
+      "severity": "medium",
+      "model": "orders",
+      "message": "Change can affect 1 downstream model(s).",
+      "confidence": 1.0,
+      "provenance": "derived",
+      "evidence": {
+        "downstream_models": 1,
+        "models": ["daily_revenue"]
+      }
+    }
+  ],
+  "coverage": {
+    "complete": true,
+    "manifest_models_analyzed": 3,
+    "static_lineage": true,
+    "differential_execution": false,
+    "column_lineage_models": 1,
+    "missing_sql_models": [],
+    "sql_parse_failures": []
+  },
+  "column_lineage": {
+    "orders": {
+      "order_id": ["o.order_id"],
+      "customer_id": ["o.customer_id"],
+      "order_status": ["o.order_status"]
+    }
+  },
+  "decision": "fail"
+}

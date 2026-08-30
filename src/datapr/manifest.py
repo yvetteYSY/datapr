@@ -26,6 +26,7 @@ class Model:
 class Manifest:
     path: str
     models: dict[str, Model]
+    dialect: str | None = None
 
 
 def _fingerprint(node: dict[str, Any]) -> str | None:
@@ -72,7 +73,14 @@ def _from_payload(payload: Any, source: str) -> Manifest:
                 None,
             ),
         )
-    return Manifest(path=source, models=models)
+    metadata = payload.get("metadata") or {}
+    adapter_type = metadata.get("adapter_type") if isinstance(metadata, dict) else None
+    dialect_aliases = {
+        "postgresql": "postgres",
+        "databricks": "databricks",
+    }
+    dialect = dialect_aliases.get(str(adapter_type), str(adapter_type)) if adapter_type else None
+    return Manifest(path=source, models=models, dialect=dialect)
 
 
 def load_manifest_text(text: str, source: str = "<memory>") -> Manifest:

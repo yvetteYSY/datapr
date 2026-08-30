@@ -1,0 +1,42 @@
+[
+  {
+    "dialect": "bigquery",
+    "sql": "select safe_cast(o.customer_id as string) as customer_id, o.total from `analytics.orders` as o qualify row_number() over (partition by o.customer_id order by o.created_at desc) = 1",
+    "expected": {
+      "customer_id": ["o.customer_id"],
+      "total": ["o.total"]
+    }
+  },
+  {
+    "dialect": "snowflake",
+    "sql": "select o.customer_id, iff(o.total > 0, o.total, 0) as net_total from analytics.orders as o qualify row_number() over (partition by o.customer_id order by o.created_at desc) = 1",
+    "expected": {
+      "customer_id": ["o.customer_id"],
+      "net_total": ["o.total"]
+    }
+  },
+  {
+    "dialect": "spark",
+    "sql": "select cast(o.customer_id as string) as customer_id, explode(o.items) as item from analytics.orders as o",
+    "expected": {
+      "customer_id": ["o.customer_id"],
+      "item": ["o.items"]
+    }
+  },
+  {
+    "dialect": "postgres",
+    "sql": "select o.customer_id, o.payload ->> 'status' as status from analytics.orders as o",
+    "expected": {
+      "customer_id": ["o.customer_id"],
+      "status": ["o.payload"]
+    }
+  },
+  {
+    "dialect": "duckdb",
+    "sql": "select o.customer_id, list_sum(o.amounts) as total from analytics.orders as o",
+    "expected": {
+      "customer_id": ["o.customer_id"],
+      "total": ["o.amounts"]
+    }
+  }
+]

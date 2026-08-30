@@ -49,6 +49,8 @@ The first release supports:
 
 See the [system design](docs/design.md) for architecture and tradeoffs, and the [roadmap](ROADMAP.md) for the evidence-driven continuation plan.
 
+Common projection lineage is fixture-backed for BigQuery, Snowflake, Spark, Postgres, and DuckDB. See the [dialect capability matrix](docs/dialect-support.md) for tested constructs and degraded behavior.
+
 ## How it works
 
 ```text
@@ -139,6 +141,8 @@ The v0.1 MVP is complete. The active v0.2 phase is adopter validation: a realist
 ## Contributing
 
 Design feedback and fixtures are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, design rules, and useful first contributions.
+
+All changes to protected `main` go through pull requests and the required test matrix. See [repository governance](docs/governance.md).
 
 ## License
 
