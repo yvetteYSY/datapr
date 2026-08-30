@@ -20,7 +20,9 @@ orders  MODIFIED
 ```
 
 > [!IMPORTANT]
-> DataPR v0.4 is published and in controlled rollout. Pin `v0.4.0` for pilots; movable `v0` remains on v0.3.0 until the production-promotion gates pass.
+> DataPR v0.5 begins the public v1 stabilization track. Its engineering contracts
+> are tested and release-ready; broader production-adoption evidence is still being
+> collected and is reported separately.
 
 ## Why DataPR?
 
@@ -68,6 +70,16 @@ Git diff + dbt manifests
 ```
 
 ## Quick start
+
+Install the public v0.5 wheel from the immutable GitHub release:
+
+```bash
+python -m pip install \
+  https://github.com/yvetteYSY/datapr/releases/download/v0.5.0/datapr-0.5.0-py3-none-any.whl
+datapr --version
+```
+
+For development from a source checkout:
 
 ```bash
 python -m pip install --editable .
@@ -123,7 +135,8 @@ For sampled data comparison, add `--base-data-dir` and `--head-data-dir`. Each d
 
 The action posts or updates one PR comment, then enforces the configured decision. See the [complete GitHub Action guide](docs/github-action.md).
 
-Use the movable `v0` tag for backwards-compatible v0 updates, the exact `v0.4.0` release after publication for reproducibility, or a full commit SHA for maximum supply-chain control.
+Use the movable `v0` tag for backwards-compatible v0 updates, the exact `v0.5.0`
+release for reproducibility, or a full commit SHA for maximum supply-chain control.
 
 ## Dogfood example
 
@@ -144,7 +157,7 @@ Untrusted artifacts fail closed against documented manifest and profiling limits
 
 Adopters can run `datapr measure` to create a local aggregate of analysis time, finding counts, and coverage without paths, model names, SQL, or raw values. See the [adopter-validation protocol](docs/adopter-validation.md) before sharing any output.
 
-Production pilots should follow the [rollout and rollback runbook](docs/production-rollout.md), beginning in advisory mode with the immutable `v0.4.0` tag.
+Production pilots should follow the [rollout and rollback runbook](docs/production-rollout.md), beginning in advisory mode with the immutable `v0.5.0` tag.
 
 ## What DataPR is not
 
@@ -152,7 +165,12 @@ DataPR is not a data catalog, orchestrator, or production observability platform
 
 ## Project status
 
-The v0.1 MVP is complete, v0.2 adds reproducible evidence, v0.3 adds trust hardening, and v0.4 adds privacy-safe adoption measurement and contributor workflows. Progress and promotion criteria are tracked in the [roadmap](ROADMAP.md); technical decisions are detailed in the [system design](docs/design.md).
+The v0.1 MVP is complete; v0.2 added reproducible evidence, v0.3 trust
+hardening, v0.4 privacy-safe validation, and v0.5 public-contract and release
+stabilization. The [v1 stability policy](docs/v1-stability-policy.md) defines the
+compatibility commitment. Engineering progress and separate adoption evidence are
+tracked in the [roadmap](ROADMAP.md); technical decisions are detailed in the
+[system design](docs/design.md).
 
 Published synthetic scale results and reproduction instructions are available in [`benchmarks`](benchmarks/README.md).
 

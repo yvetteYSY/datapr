@@ -1,13 +1,28 @@
 # Changelog
 
-All notable changes to DataPR are documented here. The project uses semantic versioning before 1.0: minor versions may evolve public interfaces, while patch versions remain backwards-compatible.
+All notable changes to DataPR are documented here. The project uses semantic versioning. v0.5 begins the v1 contract freeze: public interfaces will not intentionally break before v1.0.
 
 ## [Unreleased]
+
+## [0.5.0] - 2026-08-30
 
 ### Added
 
 - a manual workflow that pilots the published v0.4.0 Action from a clean checkout and preserves synthetic evidence
 - a production rollout, promotion-gate, and rollback runbook for controlled adoption
+- three explicitly synthetic BigQuery, Snowflake, and Postgres functional prototypes with independent CI acceptance jobs
+- a documented v1 stability, support, exit-code, and compatibility policy
+- a versioned configuration JSON schema validated against the example configuration
+- automated source/wheel build verification, installation smoke tests, provenance attestation, and immutable GitHub release creation
+
+### Fixed
+
+- configuration now fails closed on unknown keys, negative policy thresholds, mistyped booleans, and invalid profile-directory values instead of silently accepting schema-invalid input
+
+### Changed
+
+- separate v1 engineering readiness from post-release production-adoption evidence
+- promote package metadata from pre-alpha to alpha and add public project links
 
 ## [0.4.0] - 2026-08-30
 
@@ -72,7 +87,8 @@ All notable changes to DataPR are documented here. The project uses semantic ver
 - sampling uses a bounded first-row strategy in v0.1;
 - the Python package is not yet published to PyPI.
 
-[Unreleased]: https://github.com/yvetteYSY/datapr/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/yvetteYSY/datapr/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/yvetteYSY/datapr/releases/tag/v0.5.0
 [0.4.0]: https://github.com/yvetteYSY/datapr/releases/tag/v0.4.0
 [0.3.0]: https://github.com/yvetteYSY/datapr/releases/tag/v0.3.0
 [0.2.0]: https://github.com/yvetteYSY/datapr/releases/tag/v0.2.0

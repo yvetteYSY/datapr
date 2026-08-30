@@ -41,3 +41,30 @@ jobs:
         env:
           REPORT_PATH: ${{ steps.datapr.outputs.report-path }}
         run: test -n "$REPORT_PATH" && test -f "$REPORT_PATH"
+
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Verify release metadata
+        run: python scripts/verify_release.py
+      - name: Build and inspect distributions
+        run: |
+          python -m pip install \
+            "build>=1.2,<2" \
+            "twine>=5,<8" \
+            "check-jsonschema>=0.31,<1"
+          python -m build
+          python -m twine check dist/*
+          check-jsonschema \
+            --schemafile schemas/config-v1.schema.json \
+            datapr.example.yml \
+            examples/synthetic_partners/*/datapr.yml
+      - name: Install and execute wheel
+        run: |
+          python -m pip install --force-reinstall dist/*.whl
+          datapr --version
+          datapr doctor tests/fixtures/head_manifest.json

@@ -1,0 +1,71 @@
+{
+  "status": "frozen-for-v1",
+  "cli": {
+    "commands": ["doctor", "compare", "measure"],
+    "global_options": ["--help", "--version"],
+    "doctor": ["manifest"],
+    "compare": [
+      "revision_range",
+      "--base-manifest",
+      "--head-manifest",
+      "--manifest-path",
+      "--repo",
+      "--config",
+      "--base-data-dir",
+      "--head-data-dir",
+      "--out",
+      "--format",
+      "--enforce"
+    ],
+    "measure": [
+      "revision_range",
+      "--base-manifest",
+      "--head-manifest",
+      "--manifest-path",
+      "--repo",
+      "--config",
+      "--base-data-dir",
+      "--head-data-dir",
+      "--out"
+    ]
+  },
+  "exit_codes": {
+    "success": 0,
+    "enforced_policy_failure": 1,
+    "input_or_configuration_error": 2
+  },
+  "action": {
+    "inputs": [
+      "base-manifest",
+      "head-manifest",
+      "config",
+      "base-data-dir",
+      "head-data-dir",
+      "github-token",
+      "enforce"
+    ],
+    "outputs": ["exit-code", "report-path"]
+  },
+  "schemas": {
+    "configuration": "schemas/config-v1.schema.json",
+    "result": "schemas/result-v1.schema.json",
+    "measurement": "schemas/measurement-v1.schema.json"
+  },
+  "finding_ids": [
+    "model.removed",
+    "model.modified",
+    "schema.removed_column",
+    "schema.incompatible_type_change",
+    "schema.added_column",
+    "lineage.downstream_impact",
+    "lineage.sql_parse_incomplete",
+    "performance.filter_removed",
+    "performance.cross_join_added",
+    "performance.select_star_added",
+    "profile.row_count_changed",
+    "profile.null_rate_changed",
+    "profile.distribution_changed",
+    "rename.model_candidate",
+    "rename.column_candidate"
+  ]
+}

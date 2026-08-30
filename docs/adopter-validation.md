@@ -1,6 +1,6 @@
 # Adopter validation protocol
 
-DataPR v0.4 adds a local, privacy-safe measurement path for learning from real pull-request workflows without collecting telemetry. DataPR never uploads this output. Adopters choose whether to share the aggregate file or copy selected counts into an issue.
+DataPR provides a local, privacy-safe measurement path for learning from real pull-request workflows without collecting telemetry. DataPR never uploads this output. Adopters choose whether to share the aggregate file or copy selected counts into an issue. These production-evidence measurements are tracked separately from engineering release eligibility.
 
 ## Generate a measurement
 
