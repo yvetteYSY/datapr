@@ -13,6 +13,8 @@ python -m unittest discover -s tests -v
 
 ## Good first contributions
 
+Browse the [`good first issue`](https://github.com/yvetteYSY/datapr/labels/good%20first%20issue) queue for bounded tasks with acceptance criteria. Typical contributions include:
+
 - Add a SQL dialect fixture with the expected column-lineage mapping.
 - Add a realistic dbt manifest compatibility case.
 - Add a profiling input pair that captures a common data incident.
