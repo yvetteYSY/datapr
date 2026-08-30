@@ -84,6 +84,70 @@ execution:
             path.write_text("version: 2\n", encoding="utf-8")
             with self.assertRaises(ConfigError):
                 load_config(path)
+            path.write_text("version: true\n", encoding="utf-8")
+            with self.assertRaises(ConfigError):
+                load_config(path)
+
+    def test_rejects_false_or_non_text_root_fields(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "datapr.yml"
+            path.write_text("false\n", encoding="utf-8")
+            with self.assertRaisesRegex(ConfigError, "root must be a mapping"):
+                load_config(path)
+            path.write_text("version: 1\n1: value\n", encoding="utf-8")
+            with self.assertRaisesRegex(ConfigError, "unknown 'root'"):
+                load_config(path)
+
+    def test_rejects_unknown_fields(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "datapr.yml"
+            path.write_text(
+                "version: 1\npolicies:\n  fail_onn: []\n", encoding="utf-8"
+            )
+            with self.assertRaisesRegex(ConfigError, "fail_onn"):
+                load_config(path)
+
+    def test_rejects_negative_policy_thresholds(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "datapr.yml"
+            path.write_text(
+                "version: 1\npolicies:\n  row_count_change_percent: -1\n",
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(ConfigError, "non-negative"):
+                load_config(path)
+
+    def test_rejects_mistyped_boolean_and_profile_path(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "datapr.yml"
+            path.write_text(
+                "version: 1\npolicies:\n  fail_on_incomplete_coverage: 'false'\n",
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(ConfigError, "must be a boolean"):
+                load_config(path)
+            path.write_text(
+                "version: 1\nexecution:\n  base_data_dir: false\n",
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(ConfigError, "non-empty string"):
+                load_config(path)
+
+    def test_rejects_schema_invalid_numeric_and_duplicate_values(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "datapr.yml"
+            invalid_payloads = (
+                "version: 1\nexecution:\n  sample_rows: 1.5\n",
+                "version: 1\nexecution:\n  sample_seed: 1.5\n",
+                "version: 1\npolicies:\n  downstream_models: true\n",
+                "version: 1\npolicies:\n  row_count_change_percent: .nan\n",
+                "version: 1\npolicies:\n  fail_on: [model.removed, model.removed]\n",
+            )
+            for payload in invalid_payloads:
+                with self.subTest(payload=payload):
+                    path.write_text(payload, encoding="utf-8")
+                    with self.assertRaises(ConfigError):
+                        load_config(path)
 
 
 if __name__ == "__main__":

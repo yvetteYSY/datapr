@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import math
 from pathlib import Path
 from typing import Any
 
@@ -61,22 +62,77 @@ def _mapping(value: Any, field: str) -> dict[str, Any]:
     return value
 
 
+def _reject_unknown(
+    mapping: dict[str, Any], allowed: set[str], field: str
+) -> None:
+    unknown = sorted(
+        str(key) for key in mapping if not isinstance(key, str) or key not in allowed
+    )
+    if unknown:
+        raise ConfigError(f"unknown '{field}' field(s): {', '.join(unknown)}")
+
+
 def _string_set(value: Any, field: str, default: frozenset[str]) -> frozenset[str]:
     if value is None:
         return default
     if not isinstance(value, list) or not all(isinstance(item, str) for item in value):
         raise ConfigError(f"'{field}' must be a list of finding IDs")
+    if len(value) != len(set(value)):
+        raise ConfigError(f"'{field}' must not contain duplicate finding IDs")
     return frozenset(value)
 
 
 def _positive_int(value: Any, field: str, default: int) -> int:
-    try:
-        result = int(default if value is None else value)
-    except (TypeError, ValueError) as exc:
-        raise ConfigError(f"'{field}' must be an integer") from exc
+    result = default if value is None else value
+    if isinstance(result, bool) or not isinstance(result, int):
+        raise ConfigError(f"'{field}' must be an integer")
     if result <= 0:
         raise ConfigError(f"'{field}' must be positive")
     return result
+
+
+def _integer(value: Any, field: str, default: int) -> int:
+    result = default if value is None else value
+    if isinstance(result, bool) or not isinstance(result, int):
+        raise ConfigError(f"'{field}' must be an integer")
+    return result
+
+
+def _nonnegative_int(value: Any, field: str, default: int) -> int:
+    result = default if value is None else value
+    if isinstance(result, bool) or not isinstance(result, int):
+        raise ConfigError(f"'{field}' must be an integer")
+    if result < 0:
+        raise ConfigError(f"'{field}' must be non-negative")
+    return result
+
+
+def _nonnegative_float(value: Any, field: str, default: float) -> float:
+    raw = default if value is None else value
+    if isinstance(raw, bool) or not isinstance(raw, (int, float)):
+        raise ConfigError(f"'{field}' must be a number")
+    result = float(raw)
+    if not math.isfinite(result):
+        raise ConfigError(f"'{field}' must be finite")
+    if result < 0:
+        raise ConfigError(f"'{field}' must be non-negative")
+    return result
+
+
+def _boolean(value: Any, field: str, default: bool) -> bool:
+    if value is None:
+        return default
+    if not isinstance(value, bool):
+        raise ConfigError(f"'{field}' must be a boolean")
+    return value
+
+
+def _optional_string(value: Any, field: str) -> str | None:
+    if value is None:
+        return None
+    if not isinstance(value, str) or not value:
+        raise ConfigError(f"'{field}' must be a non-empty string")
+    return value
 
 
 def load_config(path: str | Path | None) -> DataPRConfig:
@@ -84,45 +140,78 @@ def load_config(path: str | Path | None) -> DataPRConfig:
         return DataPRConfig()
     config_path = Path(path)
     try:
-        payload = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
+        loaded = yaml.safe_load(config_path.read_text(encoding="utf-8"))
+        payload = {} if loaded is None else loaded
     except FileNotFoundError as exc:
         raise ConfigError(f"config not found: {config_path}") from exc
     except yaml.YAMLError as exc:
         raise ConfigError(f"invalid YAML in {config_path}: {exc}") from exc
     if not isinstance(payload, dict):
         raise ConfigError("configuration root must be a mapping")
-    if payload.get("version", 1) != 1:
+    _reject_unknown(payload, {"version", "policies", "execution"}, "root")
+    version = payload.get("version", 1)
+    if isinstance(version, bool) or version != 1:
         raise ConfigError("only configuration version 1 is supported")
 
     policies = _mapping(payload.get("policies"), "policies")
     execution = _mapping(payload.get("execution"), "execution")
+    _reject_unknown(
+        policies,
+        {
+            "fail_on",
+            "warn_on",
+            "downstream_models",
+            "row_count_change_percent",
+            "null_rate_change_percent",
+            "distribution_change_percent",
+            "fail_on_incomplete_coverage",
+        },
+        "policies",
+    )
+    _reject_unknown(
+        execution,
+        {
+            "sample_rows",
+            "sample_strategy",
+            "sample_seed",
+            "max_sample_rows",
+            "max_profile_models",
+            "max_profile_file_bytes",
+            "max_profile_columns",
+            "memory_limit_mb",
+            "base_data_dir",
+            "head_data_dir",
+        },
+        "execution",
+    )
     defaults = PolicyConfig()
     policy = PolicyConfig(
         fail_on=_string_set(policies.get("fail_on"), "policies.fail_on", defaults.fail_on),
         warn_on=_string_set(policies.get("warn_on"), "policies.warn_on", defaults.warn_on),
-        downstream_models=int(
-            policies.get("downstream_models", defaults.downstream_models)
+        downstream_models=_nonnegative_int(
+            policies.get("downstream_models"),
+            "policies.downstream_models",
+            defaults.downstream_models,
         ),
-        row_count_change_percent=float(
-            policies.get(
-                "row_count_change_percent", defaults.row_count_change_percent
-            )
+        row_count_change_percent=_nonnegative_float(
+            policies.get("row_count_change_percent"),
+            "policies.row_count_change_percent",
+            defaults.row_count_change_percent,
         ),
-        null_rate_change_percent=float(
-            policies.get(
-                "null_rate_change_percent", defaults.null_rate_change_percent
-            )
+        null_rate_change_percent=_nonnegative_float(
+            policies.get("null_rate_change_percent"),
+            "policies.null_rate_change_percent",
+            defaults.null_rate_change_percent,
         ),
-        distribution_change_percent=float(
-            policies.get(
-                "distribution_change_percent",
-                defaults.distribution_change_percent,
-            )
+        distribution_change_percent=_nonnegative_float(
+            policies.get("distribution_change_percent"),
+            "policies.distribution_change_percent",
+            defaults.distribution_change_percent,
         ),
-        fail_on_incomplete_coverage=bool(
-            policies.get(
-                "fail_on_incomplete_coverage", defaults.fail_on_incomplete_coverage
-            )
+        fail_on_incomplete_coverage=_boolean(
+            policies.get("fail_on_incomplete_coverage"),
+            "policies.fail_on_incomplete_coverage",
+            defaults.fail_on_incomplete_coverage,
         ),
     )
     defaults_execution = ExecutionConfig()
@@ -138,10 +227,11 @@ def load_config(path: str | Path | None) -> DataPRConfig:
     )
     if sample_rows > max_sample_rows:
         raise ConfigError("execution.sample_rows cannot exceed execution.max_sample_rows")
-    try:
-        sample_seed = int(execution.get("sample_seed", defaults_execution.sample_seed))
-    except (TypeError, ValueError) as exc:
-        raise ConfigError("'execution.sample_seed' must be an integer") from exc
+    sample_seed = _integer(
+        execution.get("sample_seed"),
+        "execution.sample_seed",
+        defaults_execution.sample_seed,
+    )
     sample_strategy = str(execution.get("sample_strategy", "hash")).casefold()
     if sample_strategy not in {"hash", "first"}:
         raise ConfigError("execution.sample_strategy must be 'hash' or 'first'")
@@ -172,7 +262,11 @@ def load_config(path: str | Path | None) -> DataPRConfig:
                 "execution.memory_limit_mb",
                 defaults_execution.memory_limit_mb,
             ),
-            base_data_dir=execution.get("base_data_dir"),
-            head_data_dir=execution.get("head_data_dir"),
+            base_data_dir=_optional_string(
+                execution.get("base_data_dir"), "execution.base_data_dir"
+            ),
+            head_data_dir=_optional_string(
+                execution.get("head_data_dir"), "execution.head_data_dir"
+            ),
         ),
     )

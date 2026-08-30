@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@v6
       - name: Run published DataPR Action
         id: datapr
-        uses: yvetteYSY/datapr@v0.4.0
+        uses: yvetteYSY/datapr@v0.5.0
         with:
           base-manifest: tests/fixtures/base_manifest.json
           head-manifest: tests/fixtures/head_manifest.json
@@ -47,16 +47,16 @@ jobs:
           elapsed_seconds=$(($(date +%s) - START_EPOCH))
           echo "elapsed-seconds=$elapsed_seconds" >> "$GITHUB_OUTPUT"
           {
-            echo "## DataPR v0.4.0 published-release pilot"
+            echo "## DataPR v0.5.0 published-release pilot"
             echo
             echo "- Clean-checkout time to verified report: ${elapsed_seconds}s"
             echo "- Expected policy exit code observed: ${DATAPR_EXIT_CODE}"
             echo "- Privacy-safe measurement parsed successfully"
           } >> "$GITHUB_STEP_SUMMARY"
       - name: Preserve synthetic pilot evidence
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
-          name: datapr-v0.4.0-pilot-evidence
+          name: datapr-v0.5.0-pilot-evidence
           path: |
             ${{ steps.datapr.outputs.report-path }}
             ${{ runner.temp }}/datapr-measurement.json

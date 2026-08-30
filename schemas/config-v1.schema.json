@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/yvetteYSY/datapr/schemas/config-v1.schema.json",
+  "title": "DataPR configuration v1",
+  "type": "object",
+  "properties": {
+    "version": {"const": 1},
+    "policies": {
+      "type": "object",
+      "properties": {
+        "fail_on": {
+          "type": "array",
+          "items": {"type": "string"},
+          "uniqueItems": true
+        },
+        "warn_on": {
+          "type": "array",
+          "items": {"type": "string"},
+          "uniqueItems": true
+        },
+        "downstream_models": {"type": "integer", "minimum": 0},
+        "row_count_change_percent": {"type": "number", "minimum": 0},
+        "null_rate_change_percent": {"type": "number", "minimum": 0},
+        "distribution_change_percent": {"type": "number", "minimum": 0},
+        "fail_on_incomplete_coverage": {"type": "boolean"}
+      },
+      "additionalProperties": false
+    },
+    "execution": {
+      "type": "object",
+      "properties": {
+        "sample_rows": {"type": "integer", "minimum": 1},
+        "sample_strategy": {"enum": ["hash", "first"]},
+        "sample_seed": {"type": "integer"},
+        "max_sample_rows": {"type": "integer", "minimum": 1},
+        "max_profile_models": {"type": "integer", "minimum": 1},
+        "max_profile_file_bytes": {"type": "integer", "minimum": 1},
+        "max_profile_columns": {"type": "integer", "minimum": 1},
+        "memory_limit_mb": {"type": "integer", "minimum": 1},
+        "base_data_dir": {"type": "string", "minLength": 1},
+        "head_data_dir": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

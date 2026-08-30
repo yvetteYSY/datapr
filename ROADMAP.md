@@ -1,79 +1,89 @@
-# DataPR Roadmap
+# DataPR roadmap
 
-This roadmap prioritizes evidence that DataPR is useful in real pull-request workflows. Dates are intentionally absent; phase gates are based on outcomes rather than activity.
+DataPR tracks engineering maturity and production evidence independently. A
+version can be stable and publicly useful before enough independent projects exist
+to call it production-proven. Claims in documentation must preserve that boundary.
 
-## Shipped: v0.1 MVP
+## Shipped foundation: v0.1–v0.4
 
 - dbt artifact and Git-revision comparison
-- schema and downstream-impact findings
-- selected column-level lineage
-- inferred SQL performance risks
-- bounded DuckDB differential profiling
-- configurable merge policies
-- terminal, JSON, and Markdown output
-- reusable GitHub Action with update-in-place PR comments
-- versioned result schema and explicit coverage
+- schema, lineage, SQL-risk, and bounded differential-profile findings
+- versioned comparison and privacy-safe measurement contracts
+- policy-based terminal, JSON, Markdown, and GitHub Action workflows
+- deterministic sampling, resource limits, malformed-input hardening, and a
+  50-query dialect corpus
+- reproducible scale benchmarks, release pilot, rollback runbook, and synthetic
+  acceptance environments
 
-## Now: v0.4 controlled rollout and adoption evidence
+## Now: v0.5 v1 stabilization
 
-### Dogfood workflow
+### Public contract
 
-- [x] Build a realistic dbt demo with a safe baseline.
-- [x] Exercise DataPR on a real pull request containing multiple dangerous changes ([PR #1](https://github.com/yvetteYSY/datapr/pull/1)).
-- [x] Preserve the generated report as a [golden fixture](examples/shop_analytics/golden/dangerous-change.md).
-- [x] Measure maintainer clean-checkout time to a verified published-release report ([no more than 6 seconds](benchmarks/v0.4.0-pilot.md)).
-- Measure end-to-end time to first report across independent adopters.
-- [x] Add a privacy-safe local measurement command and adopter-validation protocol.
+- [x] Define the v1 compatibility boundary and exit codes.
+- [x] Preserve result schema 1 and measurement schema 1 golden contracts.
+- [x] Publish and validate configuration schema 1.
+- [x] Keep GitHub Action inputs and outputs backwards-compatible.
+- [ ] Complete a v1 release-candidate upgrade rehearsal from v0.5.
 
-### Correctness and compatibility
+### Distribution and release
 
-- [x] Add an initial dialect matrix for BigQuery, Snowflake, Spark, Postgres, and DuckDB SQL.
-- [x] Add golden tests for Markdown and JSON rendering.
-- [x] Grow the dialect matrix from 5 to 50 representative queries.
-- [x] Add conservative model and column rename candidates as non-blocking, inferred findings.
-- Measure false-positive and incomplete-coverage rates.
+- [x] Build wheel and source distributions in protected CI.
+- [x] Inspect package metadata and install the built wheel before release.
+- [x] Automate immutable GitHub release creation and artifact provenance.
+- [x] Document public installation from GitHub release assets.
+- [ ] Evaluate optional PyPI publication after trusted-publisher ownership is
+  configured; PyPI does not block v1.
 
-### Performance and reliability
+### Public onboarding
 
-- [x] Publish reproducible benchmarks for 100, 1,000, and 10,000-model manifests.
-- [x] Add deterministic content-hash sampling before expanding distribution metrics.
-- [x] Add resource limits and malformed-artifact stress tests.
+- [x] Provide a realistic dogfood example and three synthetic acceptance paths.
+- [x] Document security, resource limits, rollout, rollback, and compatibility.
+- [ ] Record a two-minute demo and add an accessible README preview.
+- [ ] Run a clean-room v1 release-candidate install using only public docs.
 
-### Release and adoption
+## v1.0 engineering gate
 
-- [x] Create a `v0.1.0` GitHub release and movable `v0` action tag.
-- [x] Release trust-hardened `v0.3.0` and move the compatible `v0` action tag.
-- [x] Publish immutable `v0.4.0` while keeping movable `v0` on the pilot-safe baseline.
-- [x] Add a published-release pilot workflow and production rollout/rollback runbook.
-- Record a two-minute demo and add an animated README preview.
-- [x] Add privacy-aware issue and pull-request templates.
-- [x] Publish labeled good-first issues with bounded acceptance criteria ([#11](https://github.com/yvetteYSY/datapr/issues/11), [#12](https://github.com/yvetteYSY/datapr/issues/12), [#13](https://github.com/yvetteYSY/datapr/issues/13)).
-- Recruit three independent design partners.
+- public contracts are documented and regression-tested;
+- package, Action, dialect, synthetic, golden, and resource-limit checks pass;
+- a release candidate is built, installed, upgraded, and rolled back through the
+  documented process;
+- no unresolved critical correctness or security issue is known; and
+- v1 release notes accurately state support and limitations.
 
-## Next: beta readiness
+Independent adopter counts and precision measurements are not version gates.
 
-- Validate compatibility across two minor releases of the result schema.
-- Add OpenLineage import/export only after a concrete adopter request.
-- Add warehouse-native execution behind an explicit read-only adapter.
-- Publish operational guidance for large manifests and self-hosted runners.
-- Evaluate a PyPI release after package naming and release ownership are settled.
+## Parallel track: production evidence
 
-## Later: ecosystem expansion
+- recruit three independent design partners;
+- measure median end-to-end time to first report;
+- review false positives and incomplete coverage with project owners;
+- record risky changes caught before merge; and
+- publish only privacy-reviewed aggregate evidence.
 
-- Additional project adapters such as SQLMesh.
-- Catalog and ownership connectors.
-- Organization-specific policy packs.
-- Optional advisory AI explanations grounded exclusively in emitted evidence.
+Meeting this track allows DataPR to describe a release as production-proven. Until
+then, releases are described as engineering-stable, fixture-backed, or publicly
+available according to the evidence actually collected.
 
-## Success measures
+## Later ecosystem work
 
-| Signal | v0.4 target |
-|---|---:|
+- OpenLineage import/export after a concrete integration need;
+- warehouse-native execution behind an explicit read-only adapter;
+- operational guidance for very large manifests and self-hosted runners;
+- additional project adapters such as SQLMesh;
+- catalog, ownership, and organization-specific policy integrations; and
+- optional AI explanations grounded exclusively in emitted evidence.
+
+## Production-evidence targets
+
+| Signal | Target |
+| --- | ---: |
 | Independent adopter projects | 3 |
 | Risky changes caught before merge | 2 |
 | Median time to first report | <15 minutes |
-| High-severity finding precision | ≥90% |
+| Reviewed high-severity finding precision | ≥90% |
 | Dialect fixture queries | ≥50 |
 | p95 analysis time at 10,000 models | <30 seconds |
 
-The roadmap will change when adopter evidence contradicts an assumption. Feature requests without a demonstrated review-time use case remain candidates, not commitments.
+The roadmap changes when correctness, security, or user evidence contradicts an
+assumption. Feature requests without a demonstrated review-time use case remain
+candidates rather than commitments.
