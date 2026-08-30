@@ -23,7 +23,7 @@ jobs:
       # Compile or download both artifacts before this step. The exact commands
       # depend on how your project installs dbt and accesses its warehouse.
 
-      - uses: yvetteYSY/datapr@main
+      - uses: yvetteYSY/datapr@v0
         with:
           base-manifest: .datapr/base/manifest.json
           head-manifest: target/manifest.json
@@ -38,7 +38,7 @@ The action creates one Markdown comment and updates that same comment on later p
 Supply paired directories whose files are named after dbt models:
 
 ```yaml
-      - uses: yvetteYSY/datapr@main
+      - uses: yvetteYSY/datapr@v0
         with:
           base-manifest: .datapr/base/manifest.json
           head-manifest: target/manifest.json
@@ -66,4 +66,5 @@ DataPR recognizes `<model>.parquet`, `<model>.csv`, and `<model>.json`. Reports 
 - Give the workflow only `contents: read` and `pull-requests: write`.
 - Do not expose warehouse secrets to untrusted fork workflows.
 - Generate bounded, redacted samples before invoking DataPR.
-- Pin a released version instead of `main` in production.
+- Use `v0` for backwards-compatible v0 updates, `v0.1.0` for an immutable release reference, or a full commit SHA for maximum supply-chain control.
+- Fork pull requests may receive a read-only `GITHUB_TOKEN`; DataPR still enforces analysis and emits a workflow report when it cannot write a PR comment.
