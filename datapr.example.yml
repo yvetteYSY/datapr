@@ -2,6 +2,10 @@ version: 1
 
 execution:
   sample_rows: 100000
+  # Deterministic across input row order. Use "first" for v0.1 behavior.
+  sample_strategy: hash
+  # Change the seed to obtain a different reproducible sample.
+  sample_seed: 0
   # Optional directories containing <model>.parquet, <model>.csv, or <model>.json.
   # base_data_dir: .datapr/base
   # head_data_dir: .datapr/head

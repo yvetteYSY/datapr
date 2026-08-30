@@ -108,7 +108,7 @@ datapr compare \
   --enforce
 ```
 
-For sampled data comparison, add `--base-data-dir` and `--head-data-dir`. Each directory can contain `<model>.parquet`, `<model>.csv`, or `<model>.json` files. DataPR measures row counts, null rates, and numeric distributions with DuckDB.
+For sampled data comparison, add `--base-data-dir` and `--head-data-dir`. Each directory can contain `<model>.parquet`, `<model>.csv`, or `<model>.json` files. DataPR measures row counts, null rates, and numeric distributions with DuckDB. v0.2 defaults to reproducible content-hash sampling; configure `execution.sample_strategy: first` only when v0.1's file-order behavior is required. The report records the strategy, seed, and versioned hash algorithm.
 
 ## GitHub Action
 
@@ -142,6 +142,8 @@ DataPR is not a data catalog, orchestrator, or production observability platform
 ## Project status
 
 The v0.1 MVP is complete. The active v0.2 phase is adopter validation: a realistic dogfood PR, broader dialect fixtures, measured precision and scale, deterministic sampling, and a tagged release. Progress and promotion criteria are tracked in the [roadmap](ROADMAP.md); technical gates are detailed in the [v0.2 design](docs/design.md#14-v02-adopter-validation-design).
+
+Published synthetic scale results and reproduction instructions are available in [`benchmarks`](benchmarks/README.md).
 
 ## Contributing
 

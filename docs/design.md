@@ -161,7 +161,7 @@ DuckDB profiles paired, pre-materialized base and proposed model outputs. DataPR
 - null rates;
 - numeric means and ranges.
 
-DataPR does not yet execute arbitrary dbt models or access a production warehouse. Sampling is evidence, not proof. Every emitted metric records its sample bound and provenance. Quantiles, categorical frequency comparison, join-key coverage, and warehouse-native execution remain v0.2 candidates that require adopter evidence.
+DataPR does not yet execute arbitrary dbt models or access a production warehouse. Sampling is evidence, not proof. v0.2 selects a reproducible bounded sample by ordering rows on `md5(seed || versioned JSON row)` over sorted shared columns. Each sample is materialized once, and profiling uses one DuckDB thread to avoid order-sensitive aggregate variation. Every emitted metric records its sample bound, strategy, seed, algorithm, and provenance. The legacy `first` strategy remains explicit. Quantiles, categorical frequency comparison, join-key coverage, and warehouse-native execution remain v0.2 candidates that require adopter evidence.
 
 ### 5.4 Evidence model
 
@@ -231,7 +231,7 @@ The current implementation targets developer feedback latency, not warehouse-sca
 - bounds column profiling by configured sample rows;
 - allows profiling to be omitted when only static evidence is available.
 
-The next scale work is measurement-led: publish small, medium, and large manifest benchmarks before adding caches or graph partitioning. Candidate optimizations include SQL parsing by content hash, normalized-manifest caching, report truncation, and bounded traversal. They should not be implemented until a benchmark identifies the bottleneck.
+Scale work is measurement-led. The checked-in harness publishes 100, 1,000, and 10,000-model results for a linear graph with one percent changed models. Candidate optimizations include SQL parsing by content hash, normalized-manifest caching, report truncation, and bounded traversal. They should not be implemented until the benchmark or an adopter manifest identifies the bottleneck.
 
 Target for the fixture project: a warm static analysis under five seconds and a full sampled comparison under two minutes in CI.
 
@@ -314,7 +314,7 @@ Open for adopter validation:
 1. Which dbt compilation workflow is least burdensome across GitHub-hosted and self-hosted CI?
 2. Which rename signals are reliable enough to avoid false matches?
 3. Which SQL dialect constructs account for most real column-lineage failures?
-4. Should profiling use deterministic hash sampling instead of bounded first-row sampling?
+4. Which stable model keys should optionally replace full shared-row content in deterministic sampling?
 5. Which result fields map cleanly to OpenLineage facets without coupling DataPR to one backend?
 6. What false-positive rate is acceptable for inferred performance findings?
 

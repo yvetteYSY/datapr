@@ -21,6 +21,10 @@ Every finding declares its provenance:
 
 `coverage.rename_analysis` reports how many relevant models were evaluated, parsing failures, emitted candidates, and ambiguous matches that were intentionally skipped. Rename-analysis incompleteness does not change global coverage because the feature is optional advice rather than proof of compatibility.
 
+## Sampling metadata
+
+When differential profiling runs, coverage includes `sample_rows`, `sample_strategy`, `sample_seed`, `sample_hash`, and `profile_threads`. Hash-sampled profile findings also carry the strategy, seed, and sorted `sample_columns` in their evidence. `sample_hash: md5-json-v1` identifies the canonical shared-column row representation; it is a reproducibility contract, not a cryptographic security claim.
+
 ## Compatibility
 
 Within major schema version 1, fields may be added but existing meanings will not change. Consumers should ignore unknown fields. A future breaking contract will use a new schema file and major `schema_version`.

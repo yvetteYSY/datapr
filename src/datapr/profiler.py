@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from dataclasses import replace
 from pathlib import Path
-from typing import Any
 
 import duckdb
 
@@ -71,16 +70,50 @@ def _row_count(connection: duckdb.DuckDBPyConnection, path: Path) -> int:
     )
 
 
+def _sample_relation(
+    connection: duckdb.DuckDBPyConnection,
+    relation: str,
+    path: Path,
+    columns: list[str],
+    execution: ExecutionConfig,
+) -> None:
+    source = _reader(path)
+    target = _quote_identifier(relation)
+    if execution.sample_strategy == "first":
+        connection.execute(
+            f"CREATE TEMP TABLE {target} AS "
+            f"SELECT * FROM {source} LIMIT ?",
+            [str(path), execution.sample_rows],
+        )
+        return
+    if execution.sample_strategy != "hash":
+        raise ProfileError(
+            f"unsupported sample strategy: {execution.sample_strategy}"
+        )
+    if not columns:
+        raise ProfileError(f"cannot hash-sample input without columns: {path}")
+
+    fields = ", ".join(
+        f"{_quote_identifier(column)} := {_quote_identifier(column)}"
+        for column in columns
+    )
+    connection.execute(
+        f"CREATE TEMP TABLE {target} AS "
+        f"SELECT * FROM {source} "
+        "ORDER BY md5(concat(cast(? AS VARCHAR), ':', "
+        f"to_json(struct_pack({fields})))) LIMIT ?",
+        [str(path), execution.sample_seed, execution.sample_rows],
+    )
+
+
 def _column_profile(
     connection: duckdb.DuckDBPyConnection,
-    path: Path,
+    relation: str,
     column: str,
     data_type: str,
-    sample_rows: int,
 ) -> dict[str, float | int | None]:
     quoted = _quote_identifier(column)
-    source = _reader(path)
-    parameters: list[Any] = [str(path), sample_rows]
+    source = _quote_identifier(relation)
     select = (
         f"count(*) AS sampled_rows, count({quoted}) AS non_null_rows"
     )
@@ -89,9 +122,7 @@ def _column_profile(
             f", avg({quoted})::DOUBLE AS mean, min({quoted})::DOUBLE AS minimum, "
             f"max({quoted})::DOUBLE AS maximum"
         )
-    row = connection.execute(
-        f"SELECT {select} FROM (SELECT * FROM {source} LIMIT ?)", parameters
-    ).fetchone()
+    row = connection.execute(f"SELECT {select} FROM {source}").fetchone()
     sampled = int(row[0])
     non_null = int(row[1])
     result: dict[str, float | int | None] = {
@@ -120,6 +151,7 @@ def _profile_pair(
 ) -> list[Finding]:
     connection = duckdb.connect(":memory:")
     try:
+        connection.execute("SET threads = 1")
         base_count = _row_count(connection, base_path)
         head_count = _row_count(connection, head_path)
         row_change = _percent_change(float(base_count), float(head_count))
@@ -148,23 +180,44 @@ def _profile_pair(
                 )
             )
 
-        base_schema, head_schema = _schema(connection, base_path), _schema(
-            connection, head_path
+        base_schema = _schema(connection, base_path)
+        head_schema = _schema(connection, head_path)
+        shared_columns = sorted(base_schema.keys() & head_schema.keys())
+        sampling_evidence = {
+            "sample_rows": execution.sample_rows,
+            "sample_strategy": execution.sample_strategy,
+            "sample_seed": execution.sample_seed,
+            "sample_hash": (
+                "md5-json-v1" if execution.sample_strategy == "hash" else None
+            ),
+            "sample_columns": shared_columns,
+        }
+        _sample_relation(
+            connection,
+            "datapr_base_sample",
+            base_path,
+            shared_columns or sorted(base_schema),
+            execution,
+        )
+        _sample_relation(
+            connection,
+            "datapr_head_sample",
+            head_path,
+            shared_columns or sorted(head_schema),
+            execution,
         )
         for column in sorted(base_schema.keys() & head_schema.keys()):
             base_profile = _column_profile(
                 connection,
-                base_path,
+                "datapr_base_sample",
                 column,
                 base_schema[column],
-                execution.sample_rows,
             )
             head_profile = _column_profile(
                 connection,
-                head_path,
+                "datapr_head_sample",
                 column,
                 head_schema[column],
-                execution.sample_rows,
             )
             null_delta = abs(
                 float(head_profile["null_rate_percent"])
@@ -191,7 +244,7 @@ def _profile_pair(
                             "before": base_profile["null_rate_percent"],
                             "after": head_profile["null_rate_percent"],
                             "change_percentage_points": round(null_delta, 4),
-                            "sample_rows": execution.sample_rows,
+                            **sampling_evidence,
                         },
                     )
                 )
@@ -215,6 +268,7 @@ def _profile_pair(
                                 "base_profile": base_profile,
                                 "head_profile": head_profile,
                                 "mean_change_percent": round(mean_change, 4),
+                                **sampling_evidence,
                             },
                         )
                     )
@@ -259,6 +313,12 @@ def add_profile_findings(
         profiled_models=profiled,
         missing_profile_models=missing,
         sample_rows=execution.sample_rows,
-        complete=not missing,
+        sample_strategy=execution.sample_strategy,
+        sample_seed=execution.sample_seed,
+        sample_hash=(
+            "md5-json-v1" if execution.sample_strategy == "hash" else None
+        ),
+        profile_threads=1,
+        complete=bool(coverage.get("complete", True)) and not missing,
     )
     return replace(result, findings=tuple(findings), coverage=coverage)
