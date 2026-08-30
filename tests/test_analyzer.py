@@ -2,7 +2,9 @@ from pathlib import Path
 import unittest
 
 from datapr.analyzer import compare
+from datapr.config import PolicyConfig
 from datapr.manifest import ManifestError, load_manifest
+from datapr.policy import apply_policy
 
 
 FIXTURES = Path(__file__).parent / "fixtures"
@@ -22,6 +24,13 @@ class AnalyzerTest(unittest.TestCase):
         self.assertEqual(
             [("customer_id", "type_changed"), ("order_status", "added")],
             [(column.column, column.kind) for column in change.columns],
+        )
+        self.assertEqual(
+            "fail", apply_policy(result, PolicyConfig()).decision
+        )
+        self.assertEqual(
+            {"model.modified", "schema.incompatible_type_change", "schema.added_column", "lineage.downstream_impact"},
+            {finding.id for finding in result.findings},
         )
 
     def test_rejects_non_manifest_json(self) -> None:

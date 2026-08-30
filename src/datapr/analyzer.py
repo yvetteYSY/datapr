@@ -3,39 +3,8 @@
 from __future__ import annotations
 
 from collections import deque
-from dataclasses import asdict, dataclass
-
 from datapr.manifest import Manifest, Model
-
-
-@dataclass(frozen=True)
-class ColumnChange:
-    column: str
-    kind: str
-    before: str | None = None
-    after: str | None = None
-
-
-@dataclass(frozen=True)
-class ModelChange:
-    unique_id: str
-    name: str
-    kind: str
-    columns: tuple[ColumnChange, ...]
-    downstream: tuple[str, ...]
-
-
-@dataclass(frozen=True)
-class Comparison:
-    schema_version: str
-    base_manifest: str
-    head_manifest: str
-    models_base: int
-    models_head: int
-    changes: tuple[ModelChange, ...]
-
-    def to_dict(self) -> dict[str, object]:
-        return asdict(self)
+from datapr.models import ColumnChange, Comparison, Finding, ModelChange
 
 
 def _column_changes(base: Model, head: Model) -> tuple[ColumnChange, ...]:
@@ -80,6 +49,7 @@ def _downstream(unique_id: str, *manifests: Manifest) -> tuple[str, ...]:
 
 def compare(base: Manifest, head: Manifest) -> Comparison:
     changes: list[ModelChange] = []
+    findings: list[Finding] = []
     all_ids = sorted(base.models.keys() | head.models.keys())
     for unique_id in all_ids:
         before, after = base.models.get(unique_id), head.models.get(unique_id)
@@ -108,12 +78,85 @@ def compare(base: Manifest, head: Manifest) -> Comparison:
                 downstream=_downstream(unique_id, base, head),
             )
         )
+        if kind == "removed":
+            findings.append(
+                Finding(
+                    id="model.removed",
+                    severity="high",
+                    model=model.name,
+                    message="Model was removed.",
+                    confidence=1.0,
+                    provenance="derived",
+                )
+            )
+        elif kind == "modified":
+            findings.append(
+                Finding(
+                    id="model.modified",
+                    severity="info",
+                    model=model.name,
+                    message="Model SQL, dependencies, or declared schema changed.",
+                    confidence=1.0,
+                    provenance="derived",
+                )
+            )
+        for column in columns:
+            if column.kind == "removed":
+                finding_id, severity = "schema.removed_column", "high"
+                message = f"Column `{column.column}` was removed."
+            elif column.kind == "type_changed":
+                finding_id, severity = "schema.incompatible_type_change", "high"
+                message = (
+                    f"Column `{column.column}` changed type from "
+                    f"`{column.before}` to `{column.after}`."
+                )
+            else:
+                finding_id, severity = "schema.added_column", "low"
+                message = f"Column `{column.column}` was added."
+            findings.append(
+                Finding(
+                    id=finding_id,
+                    severity=severity,
+                    model=model.name,
+                    message=message,
+                    confidence=1.0,
+                    provenance="derived",
+                    evidence={
+                        "column": column.column,
+                        "before": column.before,
+                        "after": column.after,
+                    },
+                )
+            )
+        downstream = _downstream(unique_id, base, head)
+        if downstream:
+            findings.append(
+                Finding(
+                    id="lineage.downstream_impact",
+                    severity="medium",
+                    model=model.name,
+                    message=f"Change can affect {len(downstream)} downstream model(s).",
+                    confidence=1.0,
+                    provenance="derived",
+                    evidence={
+                        "downstream_models": len(downstream),
+                        "models": list(downstream),
+                    },
+                )
+            )
 
     return Comparison(
-        schema_version="0.1",
+        schema_version="1.0",
         base_manifest=str(base.path),
         head_manifest=str(head.path),
         models_base=len(base.models),
         models_head=len(head.models),
         changes=tuple(changes),
+        findings=tuple(findings),
+        coverage={
+            "complete": True,
+            "manifest_models_analyzed": len(base.models.keys() | head.models.keys()),
+            "static_lineage": True,
+            "differential_execution": False,
+        },
     )

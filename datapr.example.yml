@@ -1,0 +1,19 @@
+version: 1
+
+execution:
+  sample_rows: 100000
+  # Optional directories containing <model>.parquet, <model>.csv, or <model>.json.
+  # base_data_dir: .datapr/base
+  # head_data_dir: .datapr/head
+
+policies:
+  fail_on:
+    - model.removed
+    - schema.removed_column
+    - schema.incompatible_type_change
+  warn_on:
+    - model.modified
+  downstream_models: 10
+  row_count_change_percent: 5
+  null_rate_change_percent: 5
+  fail_on_incomplete_coverage: false
