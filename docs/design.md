@@ -1,8 +1,8 @@
 # DataPR: System Design
 
-- **Status:** v0.1 implemented; v0.2 adopter-validation design active
+- **Status:** v0.2 implemented; adopter validation active
 - **Audience:** Contributors, adopters, and maintainers
-- **Last updated:** 2026-08-29
+- **Last updated:** 2026-08-30
 
 ## 1. Summary
 
