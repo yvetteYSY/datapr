@@ -20,11 +20,11 @@
     "model.shop_analytics.orders": {
       "resource_type": "model",
       "name": "orders",
-      "checksum": {"checksum": "orders-v1"},
-      "compiled_code": "select o.order_id, o.customer_id, o.order_total, o.created_at from analytics.stg_orders as o where o.created_at >= current_date - interval '7 days'",
+      "checksum": {"checksum": "orders-v2-dangerous"},
+      "compiled_code": "select o.order_id, cast(o.customer_id as varchar) as customer_id, o.order_total, o.created_at from analytics.stg_orders as o cross join raw.customer_segments as segments",
       "columns": {
         "order_id": {"data_type": "bigint"},
-        "customer_id": {"data_type": "bigint"},
+        "customer_id": {"data_type": "varchar"},
         "order_total": {"data_type": "decimal(18,2)"},
         "created_at": {"data_type": "date"}
       },

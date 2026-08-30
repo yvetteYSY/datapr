@@ -16,7 +16,7 @@ models:
       - name: order_id
         data_type: bigint
       - name: customer_id
-        data_type: bigint
+        data_type: varchar
       - name: order_total
         data_type: decimal(18,2)
       - name: created_at
