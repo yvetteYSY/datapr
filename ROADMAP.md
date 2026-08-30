@@ -44,7 +44,7 @@ This roadmap prioritizes evidence that DataPR is useful in real pull-request wor
 - [x] Release trust-hardened `v0.3.0` and move the compatible `v0` action tag.
 - Record a two-minute demo and add an animated README preview.
 - [x] Add privacy-aware issue and pull-request templates.
-- Publish labeled good-first issues with bounded acceptance criteria.
+- [x] Publish labeled good-first issues with bounded acceptance criteria ([#11](https://github.com/yvetteYSY/datapr/issues/11), [#12](https://github.com/yvetteYSY/datapr/issues/12), [#13](https://github.com/yvetteYSY/datapr/issues/13)).
 - Recruit three independent design partners.
 
 ## Next: beta readiness
