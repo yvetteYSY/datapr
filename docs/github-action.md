@@ -18,7 +18,7 @@ jobs:
   datapr:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       # Compile or download both artifacts before this step. The exact commands
       # depend on how your project installs dbt and accesses its warehouse.
