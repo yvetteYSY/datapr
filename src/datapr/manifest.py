@@ -23,7 +23,7 @@ class Model:
 
 @dataclass(frozen=True)
 class Manifest:
-    path: Path
+    path: str
     models: dict[str, Model]
 
 
@@ -37,18 +37,12 @@ def _fingerprint(node: dict[str, Any]) -> str | None:
     return None
 
 
-def load_manifest(path: str | Path) -> Manifest:
-    manifest_path = Path(path)
-    try:
-        payload = json.loads(manifest_path.read_text(encoding="utf-8"))
-    except FileNotFoundError as exc:
-        raise ManifestError(f"manifest not found: {manifest_path}") from exc
-    except json.JSONDecodeError as exc:
-        raise ManifestError(f"invalid JSON in {manifest_path}: {exc}") from exc
-
+def _from_payload(payload: Any, source: str) -> Manifest:
+    if not isinstance(payload, dict):
+        raise ManifestError(f"{source} does not contain a JSON object")
     nodes = payload.get("nodes")
     if not isinstance(nodes, dict):
-        raise ManifestError(f"{manifest_path} does not contain a dbt 'nodes' object")
+        raise ManifestError(f"{source} does not contain a dbt 'nodes' object")
 
     models: dict[str, Model] = {}
     for unique_id, node in nodes.items():
@@ -69,4 +63,21 @@ def load_manifest(path: str | Path) -> Manifest:
             dependencies=frozenset(str(item) for item in dependencies),
             fingerprint=_fingerprint(node),
         )
-    return Manifest(path=manifest_path, models=models)
+    return Manifest(path=source, models=models)
+
+
+def load_manifest_text(text: str, source: str = "<memory>") -> Manifest:
+    try:
+        payload = json.loads(text)
+    except json.JSONDecodeError as exc:
+        raise ManifestError(f"invalid JSON in {source}: {exc}") from exc
+    return _from_payload(payload, source)
+
+
+def load_manifest(path: str | Path) -> Manifest:
+    manifest_path = Path(path)
+    try:
+        text = manifest_path.read_text(encoding="utf-8")
+    except FileNotFoundError as exc:
+        raise ManifestError(f"manifest not found: {manifest_path}") from exc
+    return load_manifest_text(text, str(manifest_path))
