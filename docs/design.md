@@ -1,6 +1,6 @@
-# DataPR: Initial Design
+# DataPR: System Design
 
-- **Status:** Draft
+- **Status:** v0.1 implemented; v0.2 adopter-validation design active
 - **Audience:** Contributors, adopters, and maintainers
 - **Last updated:** 2026-08-29
 
@@ -11,6 +11,21 @@ DataPR evaluates the likely impact of a SQL or dbt change before merge. It combi
 The initial product wedge is intentionally narrow:
 
 > Given a base revision and a proposed revision of a dbt project, identify changed models, measure their downstream blast radius, compare their schemas and sampled outputs, and decide whether CI should warn or fail.
+
+### 1.1 Implementation status
+
+The v0.1 MVP implements the product wedge end to end:
+
+- dbt manifest normalization and Git-revision artifact loading;
+- model, schema, dependency, and downstream-impact comparison;
+- selected column-level lineage with SQLGlot;
+- inferred performance-risk checks for removed filters, cross joins, and wildcard projections;
+- bounded DuckDB profiling of paired CSV, Parquet, or JSON model outputs;
+- typed findings with severity, confidence, provenance, and coverage;
+- configurable merge decisions and terminal, JSON, and Markdown renderers;
+- a reusable GitHub Action that updates one pull-request comment before enforcement.
+
+The code is deliberately an adopter-validation release rather than a production-complete platform. The [roadmap](../ROADMAP.md) defines the evidence required to promote it.
 
 ## 2. Problem
 
@@ -30,7 +45,7 @@ Existing catalogs and observability systems usually explain production state aft
 
 1. Analyze one dbt project without requiring a hosted service.
 2. Compare base and proposed revisions deterministically.
-3. Detect added, removed, renamed, and retyped columns.
+3. Detect added, removed, and retyped columns. Rename inference remains a v0.2 goal.
 4. Calculate downstream model impact from dbt metadata and parsed SQL.
 5. Compare sampled outputs using DuckDB.
 6. Emit human-readable Markdown and versioned JSON.
@@ -66,21 +81,15 @@ An initial configuration might look like:
 ```yaml
 version: 1
 
-project:
-  type: dbt
-  manifest: target/manifest.json
-
 execution:
-  engine: duckdb
   sample_rows: 100000
 
 policies:
   fail_on:
-    - removed_column
-    - incompatible_type_change
-  warn_on:
-    downstream_models: 10
-    row_count_change_percent: 5
+    - schema.removed_column
+    - schema.incompatible_type_change
+  downstream_models: 10
+  row_count_change_percent: 5
 ```
 
 ## 5. Architecture
@@ -144,18 +153,15 @@ The analyzer compares the two project IRs and produces evidence:
 
 SQL parsing should use a maintained multi-dialect parser rather than regex. Unsupported constructs produce an explicit `unknown` result, not an optimistic pass.
 
-### 5.3 Differential execution
+### 5.3 Differential profiling
 
-DuckDB executes base and proposed models against the same bounded inputs. The engine compares:
+DuckDB profiles paired, pre-materialized base and proposed model outputs. DataPR recognizes model-named CSV, Parquet, and JSON files and compares:
 
-- row count and distinctness;
+- row count;
 - null rates;
-- numeric ranges and quantiles;
-- categorical frequencies;
-- join-key coverage when keys are configured;
-- execution time and scanned-data proxies where available.
+- numeric means and ranges.
 
-Sampling is evidence, not proof. Every metric records sampling strategy, population coverage when known, and caveats.
+DataPR does not yet execute arbitrary dbt models or access a production warehouse. Sampling is evidence, not proof. Every emitted metric records its sample bound and provenance. Quantiles, categorical frequency comparison, join-key coverage, and warehouse-native execution remain v0.2 candidates that require adopter evidence.
 
 ### 5.4 Evidence model
 
@@ -165,20 +171,21 @@ Proposed minimal shape:
 
 ```json
 {
-  "schema_version": "0.1",
-  "comparison": {"base": "main", "head": "HEAD"},
-  "coverage": {"models_analyzed": 12, "models_total": 12},
+  "schema_version": "1.0",
+  "base_manifest": "main:artifacts/manifest.json",
+  "head_manifest": "target/manifest.json",
+  "coverage": {"manifest_models_analyzed": 12, "complete": true},
   "findings": [
     {
       "id": "schema.incompatible_type_change",
       "severity": "high",
       "model": "orders",
-      "column": "customer_id",
       "confidence": 1.0,
+      "provenance": "derived",
       "evidence": {
+        "column": "customer_id",
         "before": "BIGINT",
-        "after": "VARCHAR",
-        "downstream_models": 8
+        "after": "VARCHAR"
       }
     }
   ],
@@ -217,14 +224,14 @@ Optional LLM functionality may summarize findings or propose a migration, but it
 
 ## 7. Performance and scale
 
-MVP optimization targets developer feedback latency, not warehouse-scale execution:
+The current implementation targets developer feedback latency, not warehouse-scale execution. It already:
 
-- analyze only nodes changed between revisions and their relevant graph closure;
-- cache parsing by content hash;
-- cache normalized manifests by artifact hash;
-- cap graph traversal and report truncation explicitly;
-- push projection and sampling into DuckDB;
-- allow execution to be disabled when only static evidence is available.
+- analyzes the union of manifest nodes and profiles changed models only;
+- performs downstream traversal in memory;
+- bounds column profiling by configured sample rows;
+- allows profiling to be omitted when only static evidence is available.
+
+The next scale work is measurement-led: publish small, medium, and large manifest benchmarks before adding caches or graph partitioning. Candidate optimizations include SQL parsing by content hash, normalized-manifest caching, report truncation, and bounded traversal. They should not be implemented until a benchmark identifies the bottleneck.
 
 Target for the fixture project: a warm static analysis under five seconds and a full sampled comparison under two minutes in CI.
 
@@ -232,7 +239,7 @@ Target for the fixture project: a warm static analysis under five seconds and a 
 
 - Local execution is the default; no telemetry is required.
 - Reports should contain aggregates, not raw row values, unless explicitly enabled.
-- Configuration supports column redaction before rendering.
+- Reports omit raw row values; configurable redaction is planned for v0.2.
 - CI documentation will recommend least-privilege, read-only data credentials.
 - SQL and project artifacts are untrusted inputs; adapters and execution need resource limits.
 - PR comments must avoid secrets present in SQL literals or error messages.
@@ -253,14 +260,14 @@ An extension declares its supported schema versions and capabilities. The projec
 
 ## 10. Delivery plan
 
-### Milestone 0: Contract and demonstration
+### Milestone 0: Contract and demonstration — complete
 
 - Versioned result schema.
-- Fixture dbt project with a dangerous one-line change.
-- Hand-authored example PR report.
-- Architecture decision records for the project IR and evidence/policy split.
+- Dangerous-change manifest fixtures.
+- Generated example terminal, JSON, and Markdown reports.
+- Architecture decisions for evidence/policy separation and paired-output profiling.
 
-### Milestone 1: Static vertical slice
+### Milestone 1: Static vertical slice — complete
 
 - Load base and head dbt manifests.
 - Detect changed models.
@@ -268,18 +275,18 @@ An extension declares its supported schema versions and capabilities. The projec
 - Detect schema incompatibilities.
 - Render terminal, JSON, and Markdown reports.
 
-### Milestone 2: Differential evidence
+### Milestone 2: Differential evidence — complete
 
 - Execute compatible fixtures in DuckDB.
 - Compute bounded profile differences.
 - Record coverage, sampling, and provenance.
 - Add deterministic CI policy evaluation.
 
-### Milestone 3: GitHub adoption path
+### Milestone 3: GitHub adoption path — implementation complete
 
 - Publish a reusable GitHub Action.
 - Post or update one PR comment.
-- Add example repository and two-minute demo.
+- Add realistic dbt example repository and two-minute demo. *(Next-phase work.)*
 - Publish contribution guides for rules and dialect fixtures.
 
 ## 11. Key risks and mitigations
@@ -293,19 +300,68 @@ An extension declares its supported schema versions and capabilities. The projec
 | Local and warehouse results diverge | Document engine semantics and later support warehouse-native execution adapters. |
 | Integration surface slows delivery | Keep dbt + DuckDB as the only MVP path. |
 
-## 12. Open questions
+## 12. Resolved and open questions
 
-1. Should the first release require two compiled dbt manifests, or compile each revision itself?
-2. What stable identity should a model use across file moves and renames?
-3. Which column-lineage constructs are required for the first credible demo?
-4. How should samples be made deterministic across engines and revisions?
-5. Should a missing or partial execution environment default to `warn` or be policy-controlled?
-6. Which parts of the result schema can align directly with OpenLineage facets?
+Resolved for v0.1:
 
-## 13. Initial decisions
+1. DataPR consumes two precompiled manifests; compilation remains the caller's responsibility.
+2. dbt `unique_id` is the model identity. File moves preserve identity; model renames do not yet.
+3. Missing SQL, parse failures, and missing profile pairs reduce explicit coverage.
+4. Incomplete coverage is policy-controlled through `fail_on_incomplete_coverage`.
 
-- Python is the proposed implementation language for ecosystem accessibility.
+Open for adopter validation:
+
+1. Which dbt compilation workflow is least burdensome across GitHub-hosted and self-hosted CI?
+2. Which rename signals are reliable enough to avoid false matches?
+3. Which SQL dialect constructs account for most real column-lineage failures?
+4. Should profiling use deterministic hash sampling instead of bounded first-row sampling?
+5. Which result fields map cleanly to OpenLineage facets without coupling DataPR to one backend?
+6. What false-positive rate is acceptable for inferred performance findings?
+
+## 13. Current decisions
+
+- Python is the implementation language for ecosystem accessibility.
 - DuckDB is the initial execution engine.
 - dbt is the initial project adapter.
 - JSON is the canonical output; terminal and Markdown are projections.
 - Deterministic findings and policy decisions remain independent of optional AI explanations.
+
+Decision rationale is recorded in [`docs/adr`](adr/).
+
+## 14. v0.2 adopter-validation design
+
+The v0.2 phase optimizes for learning, not feature count. Work is admitted only when it improves one of four signals:
+
+1. **Setup success:** a new adopter can obtain two manifests and a useful report in under 15 minutes.
+2. **Finding precision:** high-severity static findings are actionable, with a target precision of at least 90% in curated and adopter fixtures.
+3. **Coverage visibility:** unsupported SQL or missing samples are immediately understandable from the report.
+4. **Review usefulness:** the PR comment changes a merge, migration, or reviewer-routing decision in a documented case.
+
+### 14.1 Proposed technical increments
+
+- A realistic multi-model dbt demo project and dogfood pull request.
+- A dialect capability matrix backed by golden fixtures.
+- Rename-candidate findings that remain advisory until precision is measured.
+- Deterministic hash sampling and categorical/quantile profiles.
+- Benchmarks at 100, 1,000, and 10,000 models with published methodology.
+- Versioned `v0` action tag and GitHub release automation.
+- An OpenLineage mapping design, gated on one real integration request.
+
+### 14.2 Explicitly deferred
+
+- A hosted UI or metadata service.
+- Arbitrary third-party plugins.
+- Automatic production-warehouse writes.
+- LLM-generated correctness findings.
+- Support for non-dbt project adapters before the dbt workflow is validated.
+
+### 14.3 Promotion criteria
+
+DataPR can move from v0.2 validation to broader beta when it has:
+
+- three independent adopter projects;
+- two documented incidents or risky changes caught before merge;
+- a dialect matrix covering at least 50 representative queries;
+- p95 static-analysis latency under 30 seconds for a 10,000-model synthetic manifest;
+- no unresolved critical security findings;
+- stable result-schema compatibility across two minor releases.

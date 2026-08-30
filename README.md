@@ -47,7 +47,7 @@ The first release supports:
 - policy-based CI exit codes
 - a reusable GitHub Action
 
-See [the design document](docs/design.md) for architecture, contracts, tradeoffs, and milestones.
+See the [system design](docs/design.md) for architecture and tradeoffs, and the [roadmap](ROADMAP.md) for the evidence-driven continuation plan.
 
 ## How it works
 
@@ -130,7 +130,7 @@ DataPR is not a data catalog, orchestrator, or production observability platform
 
 ## Project status
 
-The v0.1 MVP is complete. The next milestone is adopter validation: additional dbt projects and dialect fixtures, better sampling strategies, released action tags, and OpenLineage interoperability.
+The v0.1 MVP is complete. The active v0.2 phase is adopter validation: a realistic dogfood PR, broader dialect fixtures, measured precision and scale, deterministic sampling, and a tagged release. Progress and promotion criteria are tracked in the [roadmap](ROADMAP.md); technical gates are detailed in the [v0.2 design](docs/design.md#14-v02-adopter-validation-design).
 
 ## Contributing
 
