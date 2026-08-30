@@ -1,0 +1,18 @@
+version: 1
+
+policies:
+  fail_on:
+    - schema.removed_column
+    - schema.incompatible_type_change
+  warn_on:
+    - model.modified
+  row_count_change_percent: 10
+  null_rate_change_percent: 10
+  distribution_change_percent: 20
+
+execution:
+  sample_rows: 100
+  sample_strategy: hash
+  sample_seed: 42
+  max_profile_models: 5
+  memory_limit_mb: 128

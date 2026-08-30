@@ -1,0 +1,12 @@
+{
+  "synthetic": true,
+  "adapter": "postgres",
+  "decision": "warn",
+  "required_findings": [
+    "model.modified",
+    "profile.row_count_changed",
+    "profile.null_rate_changed",
+    "profile.distribution_changed"
+  ],
+  "privacy_markers": ["weekly_usage", "workspace_id", "active_seats"]
+}

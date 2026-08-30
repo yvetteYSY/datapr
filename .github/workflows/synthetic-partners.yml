@@ -1,0 +1,46 @@
+name: Synthetic partner acceptance
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "examples/synthetic_partners/**"
+      - "src/datapr/**"
+      - ".github/workflows/synthetic-partners.yml"
+  pull_request:
+    paths:
+      - "examples/synthetic_partners/**"
+      - "src/datapr/**"
+      - ".github/workflows/synthetic-partners.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  functional-test:
+    name: ${{ matrix.prototype }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        prototype:
+          - commerce_bigquery
+          - fintech_snowflake
+          - saas_postgres
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --editable .
+      - name: Run functional prototype
+        run: >-
+          python examples/synthetic_partners/run.py
+          --partner ${{ matrix.prototype }}
+          --out-dir .datapr/synthetic-partners
+      - uses: actions/upload-artifact@v6
+        with:
+          name: synthetic-${{ matrix.prototype }}
+          path: .datapr/synthetic-partners/${{ matrix.prototype }}
+          retention-days: 7

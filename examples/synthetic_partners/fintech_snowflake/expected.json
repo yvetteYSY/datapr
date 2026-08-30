@@ -1,0 +1,13 @@
+{
+  "synthetic": true,
+  "adapter": "snowflake",
+  "decision": "fail",
+  "required_findings": [
+    "model.modified",
+    "performance.filter_removed",
+    "performance.cross_join_added",
+    "performance.select_star_added",
+    "lineage.downstream_impact"
+  ],
+  "privacy_markers": ["payment_risk", "risk_dashboard", "merchant_dim"]
+}

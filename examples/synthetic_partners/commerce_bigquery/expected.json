@@ -1,0 +1,12 @@
+{
+  "synthetic": true,
+  "adapter": "bigquery",
+  "decision": "fail",
+  "required_findings": [
+    "model.modified",
+    "schema.removed_column",
+    "schema.incompatible_type_change",
+    "lineage.downstream_impact"
+  ],
+  "privacy_markers": ["fct_orders", "daily_revenue", "gross_amount"]
+}

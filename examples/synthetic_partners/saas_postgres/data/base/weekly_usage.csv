@@ -1,0 +1,11 @@
+workspace_id,plan,active_seats
+1001,free,2
+1002,free,3
+1003,team,8
+1004,team,10
+1005,team,12
+1006,business,20
+1007,business,24
+1008,business,28
+1009,enterprise,40
+1010,enterprise,50

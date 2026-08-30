@@ -1,0 +1,28 @@
+{
+  "metadata": {"adapter_type": "snowflake"},
+  "nodes": {
+    "model.fintech.payment_risk": {
+      "resource_type": "model",
+      "name": "payment_risk",
+      "checksum": {"checksum": "payment-risk-v2"},
+      "compiled_code": "select * from raw.payments cross join raw.merchant_dim",
+      "columns": {
+        "payment_id": {"data_type": "number"},
+        "merchant_id": {"data_type": "number"},
+        "amount": {"data_type": "number"}
+      },
+      "depends_on": {"nodes": []}
+    },
+    "model.fintech.risk_dashboard": {
+      "resource_type": "model",
+      "name": "risk_dashboard",
+      "checksum": {"checksum": "risk-dashboard-v1"},
+      "compiled_code": "select merchant_id, sum(amount) as amount from analytics.payment_risk group by 1",
+      "columns": {
+        "merchant_id": {"data_type": "number"},
+        "amount": {"data_type": "number"}
+      },
+      "depends_on": {"nodes": ["model.fintech.payment_risk"]}
+    }
+  }
+}

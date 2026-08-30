@@ -1,0 +1,17 @@
+{
+  "metadata": {"adapter_type": "postgres"},
+  "nodes": {
+    "model.saas.weekly_usage": {
+      "resource_type": "model",
+      "name": "weekly_usage",
+      "checksum": {"checksum": "weekly-usage-v2"},
+      "compiled_code": "select workspace_id, plan, active_seats from app.workspace_usage where week_start >= current_date - interval '14 days'",
+      "columns": {
+        "workspace_id": {"data_type": "bigint"},
+        "plan": {"data_type": "text"},
+        "active_seats": {"data_type": "integer"}
+      },
+      "depends_on": {"nodes": []}
+    }
+  }
+}
