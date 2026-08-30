@@ -20,7 +20,7 @@ orders  MODIFIED
 ```
 
 > [!IMPORTANT]
-> DataPR v0.2 is an adopter-validation release. It is usable on real dbt artifacts, but pre-1.0 interfaces may evolve from adopter feedback.
+> DataPR v0.3 is a trust-hardened adopter release. It is usable on real dbt artifacts, but pre-1.0 interfaces may evolve from adopter feedback.
 
 ## Why DataPR?
 
@@ -123,7 +123,7 @@ For sampled data comparison, add `--base-data-dir` and `--head-data-dir`. Each d
 
 The action posts or updates one PR comment, then enforces the configured decision. See the [complete GitHub Action guide](docs/github-action.md).
 
-Use the movable `v0` tag for backwards-compatible v0 updates, the exact `v0.2.0` release for reproducibility, or a full commit SHA for maximum supply-chain control.
+Use the movable `v0` tag for backwards-compatible v0 updates, the exact `v0.3.0` release for reproducibility, or a full commit SHA for maximum supply-chain control.
 
 ## Dogfood example
 
@@ -143,7 +143,7 @@ DataPR is not a data catalog, orchestrator, or production observability platform
 
 ## Project status
 
-The v0.1 MVP is complete, v0.2 adds reproducible evidence, and v0.3 trust hardening is active. Progress and promotion criteria are tracked in the [roadmap](ROADMAP.md); technical decisions are detailed in the [system design](docs/design.md).
+The v0.1 MVP is complete, v0.2 adds reproducible evidence, and v0.3 adds trust hardening and a 50-query compatibility corpus. Progress and promotion criteria are tracked in the [roadmap](ROADMAP.md); technical decisions are detailed in the [system design](docs/design.md).
 
 Published synthetic scale results and reproduction instructions are available in [`benchmarks`](benchmarks/README.md).
 

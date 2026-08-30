@@ -66,5 +66,5 @@ DataPR recognizes `<model>.parquet`, `<model>.csv`, and `<model>.json`. Reports 
 - Give the workflow only `contents: read` and `pull-requests: write`.
 - Do not expose warehouse secrets to untrusted fork workflows.
 - Generate bounded, redacted samples before invoking DataPR.
-- Use `v0` for backwards-compatible v0 updates, `v0.2.0` for an immutable release reference, or a full commit SHA for maximum supply-chain control.
+- Use `v0` for backwards-compatible v0 updates, `v0.3.0` for an immutable release reference, or a full commit SHA for maximum supply-chain control.
 - Fork pull requests may receive a read-only `GITHUB_TOKEN`; DataPR still enforces analysis and emits a workflow report when it cannot write a PR comment.
