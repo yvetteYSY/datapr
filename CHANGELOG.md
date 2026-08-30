@@ -4,6 +4,8 @@ All notable changes to DataPR are documented here. The project uses semantic ver
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-08-30
+
 ### Added
 
 - a 50-query dialect corpus with ten exact lineage cases each for BigQuery, Snowflake, Spark, Postgres, and DuckDB
@@ -57,6 +59,7 @@ All notable changes to DataPR are documented here. The project uses semantic ver
 - sampling uses a bounded first-row strategy in v0.1;
 - the Python package is not yet published to PyPI.
 
-[Unreleased]: https://github.com/yvetteYSY/datapr/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/yvetteYSY/datapr/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/yvetteYSY/datapr/releases/tag/v0.3.0
 [0.2.0]: https://github.com/yvetteYSY/datapr/releases/tag/v0.2.0
 [0.1.0]: https://github.com/yvetteYSY/datapr/releases/tag/v0.1.0
