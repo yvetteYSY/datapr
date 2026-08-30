@@ -1,0 +1,47 @@
+{
+  "measurement_schema_version": "1.0",
+  "datapr_version": "0.3.0",
+  "analysis_seconds": 0.123457,
+  "decision": "fail",
+  "models": {
+    "base": 3,
+    "head": 3,
+    "changed": 1
+  },
+  "findings": {
+    "total": 4,
+    "by_severity": {
+      "high": 1,
+      "info": 1,
+      "low": 1,
+      "medium": 1
+    },
+    "by_provenance": {
+      "derived": 4
+    },
+    "by_id": {
+      "lineage.downstream_impact": 1,
+      "model.modified": 1,
+      "schema.added_column": 1,
+      "schema.incompatible_type_change": 1
+    }
+  },
+  "coverage": {
+    "complete": true,
+    "manifest_models_analyzed": 3,
+    "static_lineage": true,
+    "column_lineage_models": 1,
+    "missing_sql_model_count": 0,
+    "sql_parse_failure_count": 0,
+    "differential_execution": false,
+    "profiled_models": 0,
+    "missing_profile_model_count": 0,
+    "rename_analysis": {
+      "complete": true,
+      "models_evaluated": 0,
+      "parse_failure_count": 0,
+      "candidates": 0,
+      "ambiguous_pairs_skipped": 0
+    }
+  }
+}

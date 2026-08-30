@@ -25,6 +25,8 @@ datapr measure main..HEAD \
 
 The output follows [`measurement-v1.schema.json`](../schemas/measurement-v1.schema.json). It contains analysis duration, model and finding counts, decision, and coverage counts. It excludes manifest paths, repository names, model and column names, SQL, finding messages and evidence, raw values, and profile file names.
 
+See the [synthetic golden example](../tests/golden/measurement-v1.json) for a complete rendered measurement. Its analysis duration is fixed for reproducibility, not a measured performance result.
+
 Review the JSON before sharing it. Finding IDs are included because they are product-level categories such as `schema.removed_column`; organizations with sensitive internal policy identifiers should redact those keys.
 
 ## Measure time to first report
