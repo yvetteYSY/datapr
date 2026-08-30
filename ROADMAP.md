@@ -21,7 +21,8 @@ This roadmap prioritizes evidence that DataPR is useful in real pull-request wor
 - [x] Build a realistic dbt demo with a safe baseline.
 - [x] Exercise DataPR on a real pull request containing multiple dangerous changes ([PR #1](https://github.com/yvetteYSY/datapr/pull/1)).
 - [x] Preserve the generated report as a [golden fixture](examples/shop_analytics/golden/dangerous-change.md).
-- Measure time-to-first-report from a clean checkout.
+- [x] Measure maintainer clean-checkout time to a verified published-release report ([no more than 6 seconds](benchmarks/v0.4.0-pilot.md)).
+- Measure end-to-end time to first report across independent adopters.
 - [x] Add a privacy-safe local measurement command and adopter-validation protocol.
 
 ### Correctness and compatibility
