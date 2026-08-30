@@ -19,6 +19,7 @@ class Model:
     columns: dict[str, str | None]
     dependencies: frozenset[str]
     fingerprint: str | None
+    sql: str | None
 
 
 @dataclass(frozen=True)
@@ -62,6 +63,14 @@ def _from_payload(payload: Any, source: str) -> Manifest:
             columns=columns,
             dependencies=frozenset(str(item) for item in dependencies),
             fingerprint=_fingerprint(node),
+            sql=next(
+                (
+                    str(node[field])
+                    for field in ("compiled_code", "compiled_sql", "raw_code", "raw_sql")
+                    if node.get(field) is not None
+                ),
+                None,
+            ),
         )
     return Manifest(path=source, models=models)
 

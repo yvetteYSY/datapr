@@ -48,6 +48,7 @@ class Comparison:
     changes: tuple[ModelChange, ...]
     findings: tuple[Finding, ...] = ()
     coverage: dict[str, Any] = field(default_factory=dict)
+    column_lineage: dict[str, dict[str, list[str]]] = field(default_factory=dict)
     decision: str = "pass"
 
     def to_dict(self) -> dict[str, Any]:

@@ -11,6 +11,7 @@
       "resource_type": "model",
       "name": "orders",
       "checksum": {"checksum": "orders-v2"},
+      "compiled_code": "select o.order_id, cast(o.customer_id as varchar) as customer_id, o.order_status from raw.orders as o",
       "columns": {
         "order_id": {"data_type": "bigint"},
         "customer_id": {"data_type": "varchar"},
@@ -22,6 +23,7 @@
       "resource_type": "model",
       "name": "daily_revenue",
       "checksum": {"checksum": "revenue-v1"},
+      "compiled_code": "select sum(o.amount) as revenue from analytics.orders as o",
       "columns": {"revenue": {"data_type": "decimal"}},
       "depends_on": {"nodes": ["model.demo.orders"]}
     }

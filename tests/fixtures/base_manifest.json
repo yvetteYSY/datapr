@@ -11,6 +11,7 @@
       "resource_type": "model",
       "name": "orders",
       "checksum": {"checksum": "orders-v1"},
+      "compiled_code": "select o.order_id, o.customer_id from raw.orders as o",
       "columns": {
         "order_id": {"data_type": "bigint"},
         "customer_id": {"data_type": "bigint"}
@@ -21,6 +22,7 @@
       "resource_type": "model",
       "name": "daily_revenue",
       "checksum": {"checksum": "revenue-v1"},
+      "compiled_code": "select sum(o.amount) as revenue from analytics.orders as o",
       "columns": {"revenue": {"data_type": "decimal"}},
       "depends_on": {"nodes": ["model.demo.orders"]}
     }
