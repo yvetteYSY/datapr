@@ -4,10 +4,13 @@ All notable changes to DataPR are documented here. The project uses semantic ver
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-08-30
+
 ### Added
 
 - a privacy-safe `datapr measure` command for local analysis-time, finding-count, decision, and coverage aggregates
 - a versioned measurement schema, adopter-validation protocol, and privacy-aware issue and pull-request templates
+- a synthetic golden measurement example and exact contract-regression test contributed through the newcomer queue
 
 ## [0.3.0] - 2026-08-30
 
@@ -64,7 +67,8 @@ All notable changes to DataPR are documented here. The project uses semantic ver
 - sampling uses a bounded first-row strategy in v0.1;
 - the Python package is not yet published to PyPI.
 
-[Unreleased]: https://github.com/yvetteYSY/datapr/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/yvetteYSY/datapr/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/yvetteYSY/datapr/releases/tag/v0.4.0
 [0.3.0]: https://github.com/yvetteYSY/datapr/releases/tag/v0.3.0
 [0.2.0]: https://github.com/yvetteYSY/datapr/releases/tag/v0.2.0
 [0.1.0]: https://github.com/yvetteYSY/datapr/releases/tag/v0.1.0
