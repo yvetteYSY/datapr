@@ -1,0 +1,62 @@
+name: Bug report
+description: Report reproducible incorrect behavior
+title: "[bug] "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please remove credentials, manifests, compiled SQL, sample data, proprietary paths, and model names. Prefer a minimal synthetic reproduction.
+  - type: input
+    id: version
+    attributes:
+      label: DataPR version
+      placeholder: v0.3.0 or commit SHA
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: GitHub-hosted Ubuntu, Python 3.12, dbt-bigquery
+    validations:
+      required: true
+  - type: dropdown
+    id: command
+    attributes:
+      label: Command or surface
+      options:
+        - datapr compare
+        - datapr measure
+        - datapr doctor
+        - GitHub Action
+        - Python library
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal synthetic reproduction
+      description: Include commands and sanitized fixture content needed to reproduce the behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: observed
+    attributes:
+      label: Observed behavior
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy confirmation
+      options:
+        - label: I removed credentials, proprietary identifiers, manifests, SQL, paths, and raw data.
+          required: true

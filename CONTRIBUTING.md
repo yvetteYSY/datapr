@@ -29,3 +29,5 @@ python -m unittest discover -s tests -v
 ## Pull requests
 
 Keep changes focused, add tests for behavior, and update the result schema or documentation when a public contract changes. Run the full test suite and `git diff --check` before opening a pull request.
+
+Use the structured issue forms for bugs, evidence-backed feature proposals, and adopter validation. Pull requests should complete the privacy and result-contract checklist. Never include credentials, production manifests, compiled proprietary SQL, or warehouse samples; reduce reproductions to synthetic fixtures.
