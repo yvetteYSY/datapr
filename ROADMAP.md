@@ -14,7 +14,7 @@ This roadmap prioritizes evidence that DataPR is useful in real pull-request wor
 - reusable GitHub Action with update-in-place PR comments
 - versioned result schema and explicit coverage
 
-## Now: v0.2 adopter validation
+## Now: v0.3 trust hardening and adopter validation
 
 ### Dogfood workflow
 
@@ -61,7 +61,7 @@ This roadmap prioritizes evidence that DataPR is useful in real pull-request wor
 
 ## Success measures
 
-| Signal | v0.2 target |
+| Signal | v0.3 target |
 |---|---:|
 | Independent adopter projects | 3 |
 | Risky changes caught before merge | 2 |
