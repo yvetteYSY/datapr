@@ -1,0 +1,36 @@
+name: DataPR dogfood
+
+on:
+  pull_request:
+    paths:
+      - "examples/shop_analytics/**"
+      - "src/datapr/**"
+      - "action.yml"
+      - "datapr.example.yml"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Extract base evidence
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          mkdir -p .datapr/base/data
+          git show "$BASE_SHA:examples/shop_analytics/artifacts/manifest.json" > .datapr/base/manifest.json
+          git show "$BASE_SHA:examples/shop_analytics/outputs/orders.csv" > .datapr/base/data/orders.csv
+      - uses: ./
+        with:
+          base-manifest: .datapr/base/manifest.json
+          head-manifest: examples/shop_analytics/artifacts/manifest.json
+          base-data-dir: .datapr/base/data
+          head-data-dir: examples/shop_analytics/outputs
+          config: datapr.example.yml
+          github-token: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "dbt_schema_version": "https://schemas.getdbt.com/dbt/manifest/v12.json",
+    "project_name": "shop_analytics"
+  },
+  "nodes": {
+    "model.shop_analytics.stg_orders": {
+      "resource_type": "model",
+      "name": "stg_orders",
+      "checksum": {"checksum": "stg-orders-v1"},
+      "compiled_code": "select cast(order_id as bigint) as order_id, cast(customer_id as bigint) as customer_id, cast(order_total as decimal(18, 2)) as order_total, cast(created_at as date) as created_at from raw.orders",
+      "columns": {
+        "order_id": {"data_type": "bigint"},
+        "customer_id": {"data_type": "bigint"},
+        "order_total": {"data_type": "decimal(18,2)"},
+        "created_at": {"data_type": "date"}
+      },
+      "depends_on": {"nodes": ["source.shop_analytics.raw.orders"]}
+    },
+    "model.shop_analytics.orders": {
+      "resource_type": "model",
+      "name": "orders",
+      "checksum": {"checksum": "orders-v1"},
+      "compiled_code": "select o.order_id, o.customer_id, o.order_total, o.created_at from analytics.stg_orders as o where o.created_at >= current_date - interval '7 days'",
+      "columns": {
+        "order_id": {"data_type": "bigint"},
+        "customer_id": {"data_type": "bigint"},
+        "order_total": {"data_type": "decimal(18,2)"},
+        "created_at": {"data_type": "date"}
+      },
+      "depends_on": {"nodes": ["model.shop_analytics.stg_orders"]}
+    },
+    "model.shop_analytics.daily_revenue": {
+      "resource_type": "model",
+      "name": "daily_revenue",
+      "checksum": {"checksum": "daily-revenue-v1"},
+      "compiled_code": "select created_at as order_date, sum(order_total) as revenue from analytics.orders group by created_at",
+      "columns": {
+        "order_date": {"data_type": "date"},
+        "revenue": {"data_type": "decimal(18,2)"}
+      },
+      "depends_on": {"nodes": ["model.shop_analytics.orders"]}
+    }
+  }
+}

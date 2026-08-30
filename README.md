@@ -120,6 +120,10 @@ For sampled data comparison, add `--base-data-dir` and `--head-data-dir`. Each d
 
 The action posts or updates one PR comment, then enforces the configured decision. See the [complete GitHub Action guide](docs/github-action.md).
 
+## Dogfood example
+
+[`examples/shop_analytics`](examples/shop_analytics) is a realistic, inspectable dbt-style project with a tracked manifest and bounded model output. The repository runs DataPR against this example on pull requests, extracting the comparison baseline directly from the target commit. See the [example walkthrough](examples/shop_analytics/README.md).
+
 ## Finding trust
 
 Every finding is labeled `observed`, `derived`, or `inferred`, with a confidence value and explicit analysis coverage. Missing SQL, unsupported parsing, or absent sample pairs cannot silently become a clean result. See the [versioned result format](docs/result-format.md).
