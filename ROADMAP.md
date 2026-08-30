@@ -14,7 +14,7 @@ This roadmap prioritizes evidence that DataPR is useful in real pull-request wor
 - reusable GitHub Action with update-in-place PR comments
 - versioned result schema and explicit coverage
 
-## Now: v0.3 trust hardening and adopter validation
+## Now: v0.4 adoption evidence
 
 ### Dogfood workflow
 
@@ -22,6 +22,7 @@ This roadmap prioritizes evidence that DataPR is useful in real pull-request wor
 - [x] Exercise DataPR on a real pull request containing multiple dangerous changes ([PR #1](https://github.com/yvetteYSY/datapr/pull/1)).
 - [x] Preserve the generated report as a [golden fixture](examples/shop_analytics/golden/dangerous-change.md).
 - Measure time-to-first-report from a clean checkout.
+- [x] Add a privacy-safe local measurement command and adopter-validation protocol.
 
 ### Correctness and compatibility
 
@@ -40,8 +41,10 @@ This roadmap prioritizes evidence that DataPR is useful in real pull-request wor
 ### Release and adoption
 
 - [x] Create a `v0.1.0` GitHub release and movable `v0` action tag.
+- [x] Release trust-hardened `v0.3.0` and move the compatible `v0` action tag.
 - Record a two-minute demo and add an animated README preview.
-- Add issue and pull-request templates plus labeled good-first issues.
+- [x] Add privacy-aware issue and pull-request templates.
+- Publish labeled good-first issues with bounded acceptance criteria.
 - Recruit three independent design partners.
 
 ## Next: beta readiness

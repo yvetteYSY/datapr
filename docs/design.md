@@ -377,3 +377,9 @@ Ambiguous matches are skipped and counted in `coverage.rename_analysis`. Parse f
 v0.3 treats review inputs as adversarial by default. Manifest normalization validates structural types and fixed byte, node, column, and SQL boundaries. Differential profiling validates configurable sample, model, file, and column limits before expensive work, then applies an explicit DuckDB memory boundary. Exceeding any boundary is a controlled error rather than incomplete evidence.
 
 Dialect evidence expands from one query per adapter to ten: 50 curated queries covering casts, JSON, arrays or lists, dates, regex, null handling, conditionals, CTEs, aggregates, and windows. All 50 must parse and exactly match their expected projection lineage on every protected-branch test run. The corpus establishes compatibility regression evidence; production precision still depends on independent adopter projects.
+
+## 16. v0.4 adoption measurement
+
+v0.4 separates product analysis time from end-to-end integration time and makes aggregate evidence easy to inspect locally. The `measure` command executes the same deterministic pipeline as `compare`, then emits a versioned JSON summary containing only durations, decisions, counts, finding categories, and coverage counts.
+
+The measurement allowlist excludes manifest paths, model and column names, SQL, finding messages and evidence, profile file names, and raw values. No telemetry or upload path exists. Adopters remain responsible for reviewing even aggregate output before voluntarily sharing it. The stable measurement schema lets maintainers aggregate results across projects without weakening the result schema or introducing a hosted data plane.

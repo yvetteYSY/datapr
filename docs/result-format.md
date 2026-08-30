@@ -30,3 +30,7 @@ Profiling coverage also records the applied memory, file-size, column-count, and
 ## Compatibility
 
 Within major schema version 1, fields may be added but existing meanings will not change. Consumers should ignore unknown fields. A future breaking contract will use a new schema file and major `schema_version`.
+
+## Adoption measurements
+
+`datapr measure` emits a separate [`measurement-v1`](../schemas/measurement-v1.schema.json) contract. It summarizes duration, decisions, finding categories, and coverage as counts while excluding report identifiers and evidence. Separating this contract prevents privacy-safe adoption aggregates from expanding or weakening the detailed comparison-result contract.

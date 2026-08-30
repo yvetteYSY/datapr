@@ -4,6 +4,11 @@ All notable changes to DataPR are documented here. The project uses semantic ver
 
 ## [Unreleased]
 
+### Added
+
+- a privacy-safe `datapr measure` command for local analysis-time, finding-count, decision, and coverage aggregates
+- a versioned measurement schema, adopter-validation protocol, and privacy-aware issue and pull-request templates
+
 ## [0.3.0] - 2026-08-30
 
 ### Added

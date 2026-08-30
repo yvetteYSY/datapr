@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/yvetteYSY/datapr/schemas/measurement-v1.schema.json",
+  "title": "DataPR privacy-safe adoption measurement v1",
+  "type": "object",
+  "required": [
+    "measurement_schema_version",
+    "datapr_version",
+    "analysis_seconds",
+    "decision",
+    "models",
+    "findings",
+    "coverage"
+  ],
+  "properties": {
+    "measurement_schema_version": { "const": "1.0" },
+    "datapr_version": { "type": "string" },
+    "analysis_seconds": { "type": "number", "minimum": 0 },
+    "decision": { "enum": ["pass", "warn", "fail"] },
+    "models": {
+      "type": "object",
+      "required": ["base", "head", "changed"],
+      "properties": {
+        "base": { "type": "integer", "minimum": 0 },
+        "head": { "type": "integer", "minimum": 0 },
+        "changed": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "findings": {
+      "type": "object",
+      "required": ["total", "by_severity", "by_provenance", "by_id"],
+      "properties": {
+        "total": { "type": "integer", "minimum": 0 },
+        "by_severity": { "$ref": "#/$defs/nonnegativeCounts" },
+        "by_provenance": { "$ref": "#/$defs/nonnegativeCounts" },
+        "by_id": { "$ref": "#/$defs/nonnegativeCounts" }
+      },
+      "additionalProperties": false
+    },
+    "coverage": {
+      "type": "object",
+      "required": [
+        "complete",
+        "manifest_models_analyzed",
+        "static_lineage",
+        "column_lineage_models",
+        "missing_sql_model_count",
+        "sql_parse_failure_count",
+        "differential_execution",
+        "profiled_models",
+        "missing_profile_model_count",
+        "rename_analysis"
+      ],
+      "properties": {
+        "complete": { "type": "boolean" },
+        "manifest_models_analyzed": { "type": "integer", "minimum": 0 },
+        "static_lineage": { "type": "boolean" },
+        "column_lineage_models": { "type": "integer", "minimum": 0 },
+        "missing_sql_model_count": { "type": "integer", "minimum": 0 },
+        "sql_parse_failure_count": { "type": "integer", "minimum": 0 },
+        "differential_execution": { "type": "boolean" },
+        "profiled_models": { "type": "integer", "minimum": 0 },
+        "missing_profile_model_count": { "type": "integer", "minimum": 0 },
+        "rename_analysis": {
+          "type": "object",
+          "required": [
+            "complete",
+            "models_evaluated",
+            "parse_failure_count",
+            "candidates",
+            "ambiguous_pairs_skipped"
+          ],
+          "properties": {
+            "complete": { "type": "boolean" },
+            "models_evaluated": { "type": "integer", "minimum": 0 },
+            "parse_failure_count": { "type": "integer", "minimum": 0 },
+            "candidates": { "type": "integer", "minimum": 0 },
+            "ambiguous_pairs_skipped": { "type": "integer", "minimum": 0 }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "nonnegativeCounts": {
+      "type": "object",
+      "additionalProperties": { "type": "integer", "minimum": 0 }
+    }
+  },
+  "additionalProperties": false
+}

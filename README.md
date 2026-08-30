@@ -137,6 +137,8 @@ Rename candidates are deliberately advisory. DataPR emits them only for unambigu
 
 Untrusted artifacts fail closed against documented manifest and profiling limits. See [resource limits](docs/resource-limits.md) for defaults, configuration, and residual risks. SQL compatibility is backed by a [50-query dialect corpus](docs/dialect-support.md).
 
+Adopters can run `datapr measure` to create a local aggregate of analysis time, finding counts, and coverage without paths, model names, SQL, or raw values. See the [adopter-validation protocol](docs/adopter-validation.md) before sharing any output.
+
 ## What DataPR is not
 
 DataPR is not a data catalog, orchestrator, or production observability platform. It consumes metadata from those systems and focuses on one decision: **is this data change safe to merge?**
