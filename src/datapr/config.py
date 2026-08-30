@@ -18,7 +18,14 @@ class PolicyConfig:
     fail_on: frozenset[str] = frozenset(
         {"model.removed", "schema.removed_column", "schema.incompatible_type_change"}
     )
-    warn_on: frozenset[str] = frozenset({"model.modified"})
+    warn_on: frozenset[str] = frozenset(
+        {
+            "model.modified",
+            "performance.filter_removed",
+            "performance.cross_join_added",
+            "performance.select_star_added",
+        }
+    )
     downstream_models: int = 10
     row_count_change_percent: float = 5.0
     null_rate_change_percent: float = 5.0

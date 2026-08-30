@@ -70,3 +70,69 @@ def add_column_lineage(result: Comparison, manifest: Manifest) -> Comparison:
         coverage=coverage,
         column_lineage=mappings,
     )
+
+
+def _sql_risk_stats(sql: str) -> dict[str, int | bool]:
+    expression = parse_one(sql)
+    return {
+        "has_filter": expression.find(exp.Where) is not None,
+        "cross_joins": sum(
+            1
+            for join in expression.find_all(exp.Join)
+            if str(join.args.get("kind") or "").upper() == "CROSS"
+        ),
+        "select_stars": sum(1 for _ in expression.find_all(exp.Star)),
+    }
+
+
+def add_sql_risk_findings(
+    result: Comparison, base: Manifest, head: Manifest
+) -> Comparison:
+    findings = list(result.findings)
+    for change in result.changes:
+        if change.kind != "modified":
+            continue
+        before, after = base.models.get(change.unique_id), head.models.get(change.unique_id)
+        if before is None or after is None or not before.sql or not after.sql:
+            continue
+        try:
+            base_stats, head_stats = _sql_risk_stats(before.sql), _sql_risk_stats(after.sql)
+        except ParseError:
+            continue
+        if base_stats["has_filter"] and not head_stats["has_filter"]:
+            findings.append(
+                Finding(
+                    id="performance.filter_removed",
+                    severity="high",
+                    model=after.name,
+                    message="A filtering predicate was removed; scanned data may increase.",
+                    confidence=0.8,
+                    provenance="inferred",
+                    evidence={"before": base_stats, "after": head_stats},
+                )
+            )
+        if int(head_stats["cross_joins"]) > int(base_stats["cross_joins"]):
+            findings.append(
+                Finding(
+                    id="performance.cross_join_added",
+                    severity="high",
+                    model=after.name,
+                    message="A cross join was added; cardinality and cost may increase.",
+                    confidence=0.9,
+                    provenance="inferred",
+                    evidence={"before": base_stats, "after": head_stats},
+                )
+            )
+        if int(head_stats["select_stars"]) > int(base_stats["select_stars"]):
+            findings.append(
+                Finding(
+                    id="performance.select_star_added",
+                    severity="medium",
+                    model=after.name,
+                    message="A wildcard projection was added and may scan unnecessary columns.",
+                    confidence=0.7,
+                    provenance="inferred",
+                    evidence={"before": base_stats, "after": head_stats},
+                )
+            )
+    return replace(result, findings=tuple(findings))

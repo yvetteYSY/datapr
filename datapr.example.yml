@@ -13,6 +13,9 @@ policies:
     - schema.incompatible_type_change
   warn_on:
     - model.modified
+    - performance.filter_removed
+    - performance.cross_join_added
+    - performance.select_star_added
   downstream_models: 10
   row_count_change_percent: 5
   null_rate_change_percent: 5

@@ -10,7 +10,7 @@ from datapr import __version__
 from datapr.analyzer import compare
 from datapr.config import ConfigError, load_config
 from datapr.git import GitError, manifests_from_range
-from datapr.lineage import add_column_lineage
+from datapr.lineage import add_column_lineage, add_sql_risk_findings
 from datapr.manifest import ManifestError, load_manifest
 from datapr.policy import apply_policy
 from datapr.profiler import ProfileError, add_profile_findings
@@ -85,6 +85,7 @@ def main(argv: list[str] | None = None) -> int:
                 head_data_dir=args.head_data_dir or execution.head_data_dir,
             )
         result = compare(base, head)
+        result = add_sql_risk_findings(result, base, head)
         result = add_column_lineage(result, head)
         result = add_profile_findings(result, execution, config.policy)
         result = apply_policy(result, config.policy)

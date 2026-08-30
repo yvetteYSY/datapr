@@ -2,8 +2,8 @@ from pathlib import Path
 import unittest
 
 from datapr.analyzer import compare
-from datapr.lineage import add_column_lineage
-from datapr.manifest import load_manifest
+from datapr.lineage import add_column_lineage, add_sql_risk_findings
+from datapr.manifest import load_manifest_text, load_manifest
 
 
 FIXTURES = Path(__file__).parent / "fixtures"
@@ -21,6 +21,22 @@ class LineageTest(unittest.TestCase):
         )
         self.assertEqual(["o.order_id"], result.column_lineage["orders"]["order_id"])
         self.assertEqual(1, result.coverage["column_lineage_models"])
+
+    def test_detects_removed_filter_and_added_cross_join(self) -> None:
+        def artifact(sql: str, checksum: str):
+            return load_manifest_text(
+                """{"nodes":{"model.demo.orders":{"resource_type":"model","name":"orders","checksum":{"checksum":"%s"},"compiled_code":%s,"columns":{},"depends_on":{"nodes":[]}}}}"""
+                % (checksum, __import__("json").dumps(sql))
+            )
+
+        base = artifact("select id from orders where created_at > current_date - 7", "v1")
+        head = artifact("select * from orders cross join customers", "v2")
+        result = add_sql_risk_findings(compare(base, head), base, head)
+        ids = {finding.id for finding in result.findings}
+
+        self.assertIn("performance.filter_removed", ids)
+        self.assertIn("performance.cross_join_added", ids)
+        self.assertIn("performance.select_star_added", ids)
 
 
 if __name__ == "__main__":
