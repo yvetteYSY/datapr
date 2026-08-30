@@ -20,7 +20,7 @@ daily_revenue                      PERFORMANCE
 ```
 
 > [!IMPORTANT]
-> DataPR is currently in the design and prototyping stage. Interfaces described here may change.
+> DataPR is currently pre-alpha. The dbt manifest comparison vertical slice is executable, but interfaces may change.
 
 ## Why DataPR?
 
@@ -64,19 +64,27 @@ Git diff + dbt manifests
                        Markdown / JSON / CI result
 ```
 
-## Proposed CLI
+## Quick start
 
 ```bash
-# Compare the current branch with main.
-datapr compare main..HEAD
+python -m pip install --editable .
 
-# Write a PR comment and a machine-readable report.
-datapr compare main..HEAD \
-  --format markdown --out datapr-report.md \
-  --json-out datapr-report.json
+# Validate an artifact.
+datapr doctor target/manifest.json
 
-# Validate project configuration and available inputs.
-datapr doctor
+# Compare artifacts compiled from base and head revisions.
+datapr compare \
+  --base-manifest path/to/base/manifest.json \
+  --head-manifest target/manifest.json \
+  --format json
+```
+
+Try the checked-in dangerous-change fixture:
+
+```bash
+datapr compare \
+  --base-manifest tests/fixtures/base_manifest.json \
+  --head-manifest tests/fixtures/head_manifest.json
 ```
 
 ## What DataPR is not

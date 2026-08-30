@@ -1,0 +1,29 @@
+{
+  "nodes": {
+    "model.demo.customers": {
+      "resource_type": "model",
+      "name": "customers",
+      "checksum": {"checksum": "customers-v1"},
+      "columns": {"customer_id": {"data_type": "bigint"}},
+      "depends_on": {"nodes": []}
+    },
+    "model.demo.orders": {
+      "resource_type": "model",
+      "name": "orders",
+      "checksum": {"checksum": "orders-v2"},
+      "columns": {
+        "order_id": {"data_type": "bigint"},
+        "customer_id": {"data_type": "varchar"},
+        "order_status": {"data_type": "varchar"}
+      },
+      "depends_on": {"nodes": ["model.demo.customers"]}
+    },
+    "model.demo.daily_revenue": {
+      "resource_type": "model",
+      "name": "daily_revenue",
+      "checksum": {"checksum": "revenue-v1"},
+      "columns": {"revenue": {"data_type": "decimal"}},
+      "depends_on": {"nodes": ["model.demo.orders"]}
+    }
+  }
+}
