@@ -19,8 +19,8 @@ This roadmap prioritizes evidence that DataPR is useful in real pull-request wor
 ### Dogfood workflow
 
 - [x] Build a realistic dbt demo with a safe baseline.
-- [ ] Exercise DataPR on a real pull request containing multiple dangerous changes.
-- [ ] Preserve the generated report as a golden fixture.
+- [x] Exercise DataPR on a real pull request containing multiple dangerous changes ([PR #1](https://github.com/yvetteYSY/datapr/pull/1)).
+- [x] Preserve the generated report as a [golden fixture](examples/shop_analytics/golden/dangerous-change.md).
 - Measure time-to-first-report from a clean checkout.
 
 ### Correctness and compatibility
