@@ -2,6 +2,14 @@
 
 All notable changes to DataPR are documented here. The project uses semantic versioning before 1.0: minor versions may evolve public interfaces, while patch versions remain backwards-compatible.
 
+## [Unreleased]
+
+### Added
+
+- conservative, non-blocking model rename candidates based on unique artifact fingerprints and declared schemas
+- conservative column rename candidates based on parsed projection expressions and declared types
+- rename-analysis coverage that records skipped ambiguity and parse failures
+
 ## [0.1.0] - 2026-08-29
 
 ### Added

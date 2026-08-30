@@ -365,3 +365,9 @@ DataPR can move from v0.2 validation to broader beta when it has:
 - p95 static-analysis latency under 30 seconds for a 10,000-model synthetic manifest;
 - no unresolved critical security findings;
 - stable result-schema compatibility across two minor releases.
+
+### 14.4 Rename-candidate precision guardrails
+
+Rename analysis is an advisory layer over the existing evidence; it never suppresses a model or column removal and does not change the default merge policy. A model rename candidate requires an identical non-empty artifact fingerprint, an identical declared schema, and a mutual one-to-one match. A column rename candidate requires an identical parsed projection expression, an identical declared type, and a mutual one-to-one match.
+
+Ambiguous matches are skipped and counted in `coverage.rename_analysis`. Parse failures are also exposed there without changing global coverage, because rename analysis is optional and inferred. Candidate findings include their signals, confidence, and `blocking: false` so consumers do not mistake a suggestion for proof.
