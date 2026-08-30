@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/yvetteYSY/datapr/schemas/result-v1.schema.json",
+  "title": "DataPR comparison result v1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "base_manifest",
+    "head_manifest",
+    "models_base",
+    "models_head",
+    "changes",
+    "findings",
+    "coverage",
+    "column_lineage",
+    "decision"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "base_manifest": { "type": "string" },
+    "head_manifest": { "type": "string" },
+    "models_base": { "type": "integer", "minimum": 0 },
+    "models_head": { "type": "integer", "minimum": 0 },
+    "decision": { "enum": ["pass", "warn", "fail"] },
+    "coverage": { "type": "object" },
+    "column_lineage": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "changes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["unique_id", "name", "kind", "columns", "downstream"],
+        "properties": {
+          "unique_id": { "type": "string" },
+          "name": { "type": "string" },
+          "kind": { "enum": ["added", "modified", "removed"] },
+          "columns": { "type": "array" },
+          "downstream": { "type": "array", "items": { "type": "string" } }
+        },
+        "additionalProperties": false
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "severity",
+          "model",
+          "message",
+          "confidence",
+          "provenance",
+          "evidence"
+        ],
+        "properties": {
+          "id": { "type": "string" },
+          "severity": { "enum": ["info", "low", "medium", "high", "critical"] },
+          "model": { "type": "string" },
+          "message": { "type": "string" },
+          "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+          "provenance": { "enum": ["observed", "derived", "inferred", "unknown"] },
+          "evidence": { "type": "object" }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,26 +1,26 @@
 # DataPR
 
+[![CI](https://github.com/yvetteYSY/datapr/actions/workflows/ci.yml/badge.svg)](https://github.com/yvetteYSY/datapr/actions/workflows/ci.yml)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+
 **See the impact of a data change before it reaches production.**
 
 DataPR is an open-source pull-request reviewer for analytics engineering. It compares a proposed SQL or dbt change with its base revision and reports schema breaks, downstream blast radius, data-profile differences, and likely performance regressions.
 
 ```text
-$ datapr compare main..HEAD
+$ datapr compare --base-manifest base/manifest.json --head-manifest target/manifest.json
+DataPR decision: FAIL
+Compared 3 base models with 3 head models.
+Changed models: 1 | Findings: 4
 
-DataPR found 2 high-risk changes
-
-orders.customer_id                 BREAKING
-  type: BIGINT -> VARCHAR
-  impact: 8 downstream models, 2 critical
-  sample: 3.8% fewer rows join to customers
-
-daily_revenue                      PERFORMANCE
-  estimated scanned data: +71%
-  cause: partition predicate removed
+orders  MODIFIED
+  downstream (1): daily_revenue
+  column customer_id: type_changed (bigint -> varchar)
+  column order_status: added (- -> varchar)
 ```
 
 > [!IMPORTANT]
-> DataPR is currently pre-alpha. The dbt manifest comparison vertical slice is executable, but interfaces may change.
+> DataPR v0.1 is an MVP. It is usable on real dbt artifacts, but pre-1.0 interfaces may evolve from adopter feedback.
 
 ## Why DataPR?
 
@@ -33,9 +33,9 @@ The project is guided by four principles:
 - **Open interfaces.** Lineage, policies, and results use documented formats with OpenLineage interoperability as a goal.
 - **Incremental adoption.** A team can start with one dbt project and one CI job.
 
-## MVP
+## MVP capabilities
 
-The first release will support:
+The first release supports:
 
 - dbt manifest ingestion
 - changed-model detection from a Git diff
@@ -49,7 +49,7 @@ The first release will support:
 
 See [the design document](docs/design.md) for architecture, contracts, tradeoffs, and milestones.
 
-## Proposed workflow
+## How it works
 
 ```text
 Git diff + dbt manifests
@@ -87,25 +87,54 @@ datapr compare \
   --head-manifest tests/fixtures/head_manifest.json
 ```
 
+Compare a tracked manifest across Git revisions:
+
+```bash
+datapr compare main..HEAD --manifest-path artifacts/manifest.json
+```
+
+Generate a merge-enforced Markdown report:
+
+```bash
+datapr compare \
+  --base-manifest path/to/base/manifest.json \
+  --head-manifest target/manifest.json \
+  --config datapr.yml \
+  --format markdown \
+  --out datapr-report.md \
+  --enforce
+```
+
+For sampled data comparison, add `--base-data-dir` and `--head-data-dir`. Each directory can contain `<model>.parquet`, `<model>.csv`, or `<model>.json` files. DataPR measures row counts, null rates, and numeric distributions with DuckDB.
+
+## GitHub Action
+
+```yaml
+- uses: yvetteYSY/datapr@main
+  with:
+    base-manifest: .datapr/base/manifest.json
+    head-manifest: target/manifest.json
+    config: datapr.yml
+    github-token: ${{ secrets.GITHUB_TOKEN }}
+```
+
+The action posts or updates one PR comment, then enforces the configured decision. See the [complete GitHub Action guide](docs/github-action.md).
+
+## Finding trust
+
+Every finding is labeled `observed`, `derived`, or `inferred`, with a confidence value and explicit analysis coverage. Missing SQL, unsupported parsing, or absent sample pairs cannot silently become a clean result. See the [versioned result format](docs/result-format.md).
+
 ## What DataPR is not
 
 DataPR is not a data catalog, orchestrator, or production observability platform. It consumes metadata from those systems and focuses on one decision: **is this data change safe to merge?**
 
 ## Project status
 
-The immediate objective is a compelling vertical slice: an intentionally dangerous one-line SQL change, analyzed locally and summarized in a pull-request comment.
-
-Near-term milestones:
-
-1. Define the result schema and fixture repository.
-2. Detect changed dbt models and downstream impact.
-3. Compare schemas and sampled query outputs in DuckDB.
-4. Render a useful Markdown report.
-5. Package the workflow as a GitHub Action.
+The v0.1 MVP is complete. The next milestone is adopter validation: additional dbt projects and dialect fixtures, better sampling strategies, released action tags, and OpenLineage interoperability.
 
 ## Contributing
 
-Early design feedback is welcome. Useful areas include SQL dialect fixtures, compatibility rules, representative failure cases, and integrations. Until the first executable prototype lands, please start with an issue describing the use case and expected behavior.
+Design feedback and fixtures are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, design rules, and useful first contributions.
 
 ## License
 

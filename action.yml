@@ -1,0 +1,109 @@
+name: DataPR
+description: Analyze dbt changes and publish merge-safety evidence
+author: DataPR contributors
+
+branding:
+  icon: git-pull-request
+  color: blue
+
+inputs:
+  base-manifest:
+    description: Path to the base revision dbt manifest
+    required: true
+  head-manifest:
+    description: Path to the proposed revision dbt manifest
+    required: true
+  config:
+    description: Optional path to datapr.yml
+    required: false
+  base-data-dir:
+    description: Optional directory of base model outputs for DuckDB profiling
+    required: false
+  head-data-dir:
+    description: Optional directory of head model outputs for DuckDB profiling
+    required: false
+  github-token:
+    description: Token used to create or update a pull-request comment
+    required: false
+  enforce:
+    description: Fail the action when DataPR policy decides fail
+    required: false
+    default: "true"
+
+outputs:
+  exit-code:
+    description: DataPR CLI exit code before action enforcement
+    value: ${{ steps.analyze.outputs.exit-code }}
+  report-path:
+    description: Path to the generated Markdown report
+    value: ${{ steps.analyze.outputs.report-path }}
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+    - name: Install DataPR
+      shell: bash
+      run: python -m pip install --quiet "$GITHUB_ACTION_PATH"
+    - name: Analyze data change
+      id: analyze
+      shell: bash
+      env:
+        INPUT_BASE_MANIFEST: ${{ inputs.base-manifest }}
+        INPUT_HEAD_MANIFEST: ${{ inputs.head-manifest }}
+        INPUT_CONFIG: ${{ inputs.config }}
+        INPUT_BASE_DATA_DIR: ${{ inputs.base-data-dir }}
+        INPUT_HEAD_DATA_DIR: ${{ inputs.head-data-dir }}
+      run: |
+        report_path="$RUNNER_TEMP/datapr-report.md"
+        args=(
+          compare
+          --base-manifest "$INPUT_BASE_MANIFEST"
+          --head-manifest "$INPUT_HEAD_MANIFEST"
+          --format markdown
+          --out "$report_path"
+          --enforce
+        )
+        if [[ -n "$INPUT_CONFIG" ]]; then args+=(--config "$INPUT_CONFIG"); fi
+        if [[ -n "$INPUT_BASE_DATA_DIR" ]]; then args+=(--base-data-dir "$INPUT_BASE_DATA_DIR"); fi
+        if [[ -n "$INPUT_HEAD_DATA_DIR" ]]; then args+=(--head-data-dir "$INPUT_HEAD_DATA_DIR"); fi
+        set +e
+        datapr "${args[@]}"
+        datapr_exit_code=$?
+        set -e
+        echo "exit-code=$datapr_exit_code" >> "$GITHUB_OUTPUT"
+        echo "report-path=$report_path" >> "$GITHUB_OUTPUT"
+    - name: Create or update DataPR comment
+      if: github.event_name == 'pull_request' && inputs.github-token != ''
+      uses: actions/github-script@v7
+      env:
+        DATAPR_REPORT_PATH: ${{ steps.analyze.outputs.report-path }}
+      with:
+        github-token: ${{ inputs.github-token }}
+        script: |
+          const fs = require('fs');
+          const marker = '<!-- datapr-report -->';
+          const body = fs.readFileSync(process.env.DATAPR_REPORT_PATH, 'utf8');
+          const {owner, repo} = context.repo;
+          const issue_number = context.issue.number;
+          const comments = await github.paginate(github.rest.issues.listComments, {
+            owner, repo, issue_number, per_page: 100
+          });
+          const existing = comments.find(comment =>
+            comment.user?.type === 'Bot' && comment.body?.includes(marker)
+          );
+          if (existing) {
+            await github.rest.issues.updateComment({
+              owner, repo, comment_id: existing.id, body
+            });
+          } else {
+            await github.rest.issues.createComment({owner, repo, issue_number, body});
+          }
+    - name: Enforce DataPR decision
+      if: inputs.enforce == 'true' && steps.analyze.outputs.exit-code != '0'
+      shell: bash
+      env:
+        DATAPR_EXIT_CODE: ${{ steps.analyze.outputs.exit-code }}
+      run: exit "$DATAPR_EXIT_CODE"
