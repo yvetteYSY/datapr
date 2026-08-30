@@ -11,8 +11,8 @@ from datapr.manifest import Manifest
 from datapr.models import Comparison, Finding
 
 
-def _projection_lineage(sql: str) -> dict[str, list[str]]:
-    expression = parse_one(sql)
+def _projection_lineage(sql: str, dialect: str | None = None) -> dict[str, list[str]]:
+    expression = parse_one(sql, read=dialect)
     select = expression if isinstance(expression, exp.Select) else expression.find(exp.Select)
     if select is None:
         return {}
@@ -41,7 +41,7 @@ def add_column_lineage(result: Comparison, manifest: Manifest) -> Comparison:
             missing.append(model.name if model else unique_id)
             continue
         try:
-            mappings[model.name] = _projection_lineage(model.sql)
+            mappings[model.name] = _projection_lineage(model.sql, manifest.dialect)
         except ParseError as exc:
             parse_failures.append(model.name)
             findings.append(
@@ -72,8 +72,8 @@ def add_column_lineage(result: Comparison, manifest: Manifest) -> Comparison:
     )
 
 
-def _sql_risk_stats(sql: str) -> dict[str, int | bool]:
-    expression = parse_one(sql)
+def _sql_risk_stats(sql: str, dialect: str | None = None) -> dict[str, int | bool]:
+    expression = parse_one(sql, read=dialect)
     return {
         "has_filter": expression.find(exp.Where) is not None,
         "cross_joins": sum(
@@ -96,7 +96,8 @@ def add_sql_risk_findings(
         if before is None or after is None or not before.sql or not after.sql:
             continue
         try:
-            base_stats, head_stats = _sql_risk_stats(before.sql), _sql_risk_stats(after.sql)
+            base_stats = _sql_risk_stats(before.sql, base.dialect)
+            head_stats = _sql_risk_stats(after.sql, head.dialect)
         except ParseError:
             continue
         if base_stats["has_filter"] and not head_stats["has_filter"]:

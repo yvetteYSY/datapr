@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 import unittest
 
@@ -37,6 +38,39 @@ class LineageTest(unittest.TestCase):
         self.assertIn("performance.filter_removed", ids)
         self.assertIn("performance.cross_join_added", ids)
         self.assertIn("performance.select_star_added", ids)
+
+    def test_dialect_capability_matrix(self) -> None:
+        cases = json.loads((FIXTURES / "dialects" / "cases.json").read_text())
+        for case in cases:
+            with self.subTest(dialect=case["dialect"]):
+                base = load_manifest_text(
+                    json.dumps(
+                        {
+                            "metadata": {"adapter_type": case["dialect"]},
+                            "nodes": {},
+                        }
+                    )
+                )
+                head = load_manifest_text(
+                    json.dumps(
+                        {
+                            "metadata": {"adapter_type": case["dialect"]},
+                            "nodes": {
+                                "model.demo.orders": {
+                                    "resource_type": "model",
+                                    "name": "orders",
+                                    "checksum": {"checksum": "v1"},
+                                    "compiled_code": case["sql"],
+                                    "columns": {},
+                                    "depends_on": {"nodes": []},
+                                }
+                            },
+                        }
+                    )
+                )
+                result = add_column_lineage(compare(base, head), head)
+                self.assertEqual(case["expected"], result.column_lineage["orders"])
+                self.assertEqual([], result.coverage["sql_parse_failures"])
 
 
 if __name__ == "__main__":

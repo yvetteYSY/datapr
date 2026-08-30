@@ -25,8 +25,9 @@ This roadmap prioritizes evidence that DataPR is useful in real pull-request wor
 
 ### Correctness and compatibility
 
-- Add a dialect matrix for BigQuery, Snowflake, Spark, Postgres, and DuckDB SQL.
-- Add golden tests for Markdown and JSON rendering.
+- [x] Add an initial dialect matrix for BigQuery, Snowflake, Spark, Postgres, and DuckDB SQL.
+- [x] Add golden tests for Markdown and JSON rendering.
+- [ ] Grow the dialect matrix from 5 to at least 50 representative queries.
 - Add rename candidates as non-blocking, inferred findings.
 - Measure false-positive and incomplete-coverage rates.
 
