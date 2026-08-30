@@ -371,3 +371,9 @@ DataPR can move from v0.2 validation to broader beta when it has:
 Rename analysis is an advisory layer over the existing evidence; it never suppresses a model or column removal and does not change the default merge policy. A model rename candidate requires an identical non-empty artifact fingerprint, an identical declared schema, and a mutual one-to-one match. A column rename candidate requires an identical parsed projection expression, an identical declared type, and a mutual one-to-one match.
 
 Ambiguous matches are skipped and counted in `coverage.rename_analysis`. Parse failures are also exposed there without changing global coverage, because rename analysis is optional and inferred. Candidate findings include their signals, confidence, and `blocking: false` so consumers do not mistake a suggestion for proof.
+
+## 15. v0.3 trust hardening
+
+v0.3 treats review inputs as adversarial by default. Manifest normalization validates structural types and fixed byte, node, column, and SQL boundaries. Differential profiling validates configurable sample, model, file, and column limits before expensive work, then applies an explicit DuckDB memory boundary. Exceeding any boundary is a controlled error rather than incomplete evidence.
+
+Dialect evidence expands from one query per adapter to ten: 50 curated queries covering casts, JSON, arrays or lists, dates, regex, null handling, conditionals, CTEs, aggregates, and windows. All 50 must parse and exactly match their expected projection lineage on every protected-branch test run. The corpus establishes compatibility regression evidence; production precision still depends on independent adopter projects.

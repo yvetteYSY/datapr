@@ -72,6 +72,7 @@ class ProfilerTest(unittest.TestCase):
         self.assertTrue(profiled.coverage["complete"])
         self.assertEqual("hash", profiled.coverage["sample_strategy"])
         self.assertEqual("md5-json-v1", profiled.coverage["sample_hash"])
+        self.assertEqual(512, profiled.coverage["profile_memory_limit_mb"])
         self.assertFalse(preserved_incomplete.coverage["complete"])
 
     def test_hash_sample_is_independent_of_input_order(self) -> None:
@@ -137,6 +138,42 @@ class ProfilerTest(unittest.TestCase):
                 ExecutionConfig(base_data_dir="missing"),
                 PolicyConfig(),
             )
+
+    def test_enforces_file_column_and_model_limits(self) -> None:
+        result = compare(
+            load_manifest(FIXTURES / "base_manifest.json"),
+            load_manifest(FIXTURES / "head_manifest.json"),
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            base_dir, head_dir = Path(directory) / "base", Path(directory) / "head"
+            base_dir.mkdir()
+            head_dir.mkdir()
+            rows = [{"order_id": 1, "amount": 10, "note": "ok"}]
+            _write_csv(base_dir / "orders.csv", rows)
+            _write_csv(head_dir / "orders.csv", rows)
+            common = {
+                "base_data_dir": str(base_dir),
+                "head_data_dir": str(head_dir),
+            }
+
+            with self.assertRaisesRegex(ProfileError, "bytes; limit is 1"):
+                add_profile_findings(
+                    result,
+                    ExecutionConfig(max_profile_file_bytes=1, **common),
+                    PolicyConfig(),
+                )
+            with self.assertRaisesRegex(ProfileError, "3 columns; limit is 1"):
+                add_profile_findings(
+                    result,
+                    ExecutionConfig(max_profile_columns=1, **common),
+                    PolicyConfig(),
+                )
+            with self.assertRaisesRegex(ProfileError, "2 profile-eligible models"):
+                add_profile_findings(
+                    replace(result, changes=result.changes * 2),
+                    ExecutionConfig(max_profile_models=1, **common),
+                    PolicyConfig(),
+                )
 
 
 if __name__ == "__main__":

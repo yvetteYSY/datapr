@@ -135,13 +135,15 @@ Every finding is labeled `observed`, `derived`, or `inferred`, with a confidence
 
 Rename candidates are deliberately advisory. DataPR emits them only for unambiguous pairs supported by identical model fingerprints and schemas, or by identical parsed projection expressions and declared types. It continues to report the underlying removal as breaking until teams confirm the migration is safe.
 
+Untrusted artifacts fail closed against documented manifest and profiling limits. See [resource limits](docs/resource-limits.md) for defaults, configuration, and residual risks. SQL compatibility is backed by a [50-query dialect corpus](docs/dialect-support.md).
+
 ## What DataPR is not
 
 DataPR is not a data catalog, orchestrator, or production observability platform. It consumes metadata from those systems and focuses on one decision: **is this data change safe to merge?**
 
 ## Project status
 
-The v0.1 MVP is complete. v0.2 adds advisory rename detection, deterministic sampling, and published scale evidence while adopter validation continues. Progress and promotion criteria are tracked in the [roadmap](ROADMAP.md); technical gates are detailed in the [v0.2 design](docs/design.md#14-v02-adopter-validation-design).
+The v0.1 MVP is complete, v0.2 adds reproducible evidence, and v0.3 trust hardening is active. Progress and promotion criteria are tracked in the [roadmap](ROADMAP.md); technical decisions are detailed in the [system design](docs/design.md).
 
 Published synthetic scale results and reproduction instructions are available in [`benchmarks`](benchmarks/README.md).
 

@@ -38,6 +38,11 @@ class ExecutionConfig:
     sample_rows: int = 100_000
     sample_strategy: str = "hash"
     sample_seed: int = 0
+    max_sample_rows: int = 1_000_000
+    max_profile_models: int = 100
+    max_profile_file_bytes: int = 1024 * 1024 * 1024
+    max_profile_columns: int = 1_000
+    memory_limit_mb: int = 512
     base_data_dir: str | None = None
     head_data_dir: str | None = None
 
@@ -62,6 +67,16 @@ def _string_set(value: Any, field: str, default: frozenset[str]) -> frozenset[st
     if not isinstance(value, list) or not all(isinstance(item, str) for item in value):
         raise ConfigError(f"'{field}' must be a list of finding IDs")
     return frozenset(value)
+
+
+def _positive_int(value: Any, field: str, default: int) -> int:
+    try:
+        result = int(default if value is None else value)
+    except (TypeError, ValueError) as exc:
+        raise ConfigError(f"'{field}' must be an integer") from exc
+    if result <= 0:
+        raise ConfigError(f"'{field}' must be positive")
+    return result
 
 
 def load_config(path: str | Path | None) -> DataPRConfig:
@@ -110,13 +125,23 @@ def load_config(path: str | Path | None) -> DataPRConfig:
             )
         ),
     )
+    defaults_execution = ExecutionConfig()
+    sample_rows = _positive_int(
+        execution.get("sample_rows"),
+        "execution.sample_rows",
+        defaults_execution.sample_rows,
+    )
+    max_sample_rows = _positive_int(
+        execution.get("max_sample_rows"),
+        "execution.max_sample_rows",
+        defaults_execution.max_sample_rows,
+    )
+    if sample_rows > max_sample_rows:
+        raise ConfigError("execution.sample_rows cannot exceed execution.max_sample_rows")
     try:
-        sample_rows = int(execution.get("sample_rows", 100_000))
-        sample_seed = int(execution.get("sample_seed", 0))
+        sample_seed = int(execution.get("sample_seed", defaults_execution.sample_seed))
     except (TypeError, ValueError) as exc:
-        raise ConfigError("execution sample_rows and sample_seed must be integers") from exc
-    if sample_rows <= 0:
-        raise ConfigError("execution.sample_rows must be positive")
+        raise ConfigError("'execution.sample_seed' must be an integer") from exc
     sample_strategy = str(execution.get("sample_strategy", "hash")).casefold()
     if sample_strategy not in {"hash", "first"}:
         raise ConfigError("execution.sample_strategy must be 'hash' or 'first'")
@@ -126,6 +151,27 @@ def load_config(path: str | Path | None) -> DataPRConfig:
             sample_rows=sample_rows,
             sample_strategy=sample_strategy,
             sample_seed=sample_seed,
+            max_sample_rows=max_sample_rows,
+            max_profile_models=_positive_int(
+                execution.get("max_profile_models"),
+                "execution.max_profile_models",
+                defaults_execution.max_profile_models,
+            ),
+            max_profile_file_bytes=_positive_int(
+                execution.get("max_profile_file_bytes"),
+                "execution.max_profile_file_bytes",
+                defaults_execution.max_profile_file_bytes,
+            ),
+            max_profile_columns=_positive_int(
+                execution.get("max_profile_columns"),
+                "execution.max_profile_columns",
+                defaults_execution.max_profile_columns,
+            ),
+            memory_limit_mb=_positive_int(
+                execution.get("memory_limit_mb"),
+                "execution.memory_limit_mb",
+                defaults_execution.memory_limit_mb,
+            ),
             base_data_dir=execution.get("base_data_dir"),
             head_data_dir=execution.get("head_data_dir"),
         ),
