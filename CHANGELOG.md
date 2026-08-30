@@ -4,6 +4,8 @@ All notable changes to DataPR are documented here. The project uses semantic ver
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-08-30
+
 ### Added
 
 - conservative, non-blocking model rename candidates based on unique artifact fingerprints and declared schemas
@@ -12,6 +14,10 @@ All notable changes to DataPR are documented here. The project uses semantic ver
 - deterministic, input-order-independent content-hash sampling with a configurable seed
 - a legacy `first` sampling strategy for explicit v0.1 compatibility
 - reproducible 100, 1,000, and 10,000-model static-analysis benchmarks
+
+### Fixed
+
+- differential profiling preserves an existing incomplete-coverage result instead of replacing it when all configured sample pairs are present
 
 ## [0.1.0] - 2026-08-29
 
@@ -44,4 +50,6 @@ All notable changes to DataPR are documented here. The project uses semantic ver
 - sampling uses a bounded first-row strategy in v0.1;
 - the Python package is not yet published to PyPI.
 
+[Unreleased]: https://github.com/yvetteYSY/datapr/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/yvetteYSY/datapr/releases/tag/v0.2.0
 [0.1.0]: https://github.com/yvetteYSY/datapr/releases/tag/v0.1.0

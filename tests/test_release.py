@@ -18,13 +18,15 @@ class ReleaseTest(unittest.TestCase):
         self.assertIn("github-token", metadata["inputs"])
 
     def test_release_version_is_consistent(self) -> None:
-        self.assertEqual("0.1.0", __version__)
+        self.assertEqual("0.2.0", __version__)
         changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
-        release_notes = (ROOT / "docs/releases/v0.1.0.md").read_text(
+        release_notes = (ROOT / "docs/releases/v0.2.0.md").read_text(
             encoding="utf-8"
         )
-        self.assertIn("## [0.1.0]", changelog)
-        self.assertIn("# DataPR v0.1.0", release_notes)
+        project = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
+        self.assertIn('version = "0.2.0"', project)
+        self.assertIn("## [0.2.0]", changelog)
+        self.assertIn("# DataPR v0.2.0", release_notes)
 
     def test_consumer_examples_use_release_tag(self) -> None:
         for path in (ROOT / "README.md", ROOT / "docs/github-action.md"):

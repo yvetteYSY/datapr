@@ -39,7 +39,7 @@ This roadmap prioritizes evidence that DataPR is useful in real pull-request wor
 
 ### Release and adoption
 
-- [ ] Create a `v0.1.0` GitHub release and movable `v0` action tag.
+- [x] Create a `v0.1.0` GitHub release and movable `v0` action tag.
 - Record a two-minute demo and add an animated README preview.
 - Add issue and pull-request templates plus labeled good-first issues.
 - Recruit three independent design partners.
