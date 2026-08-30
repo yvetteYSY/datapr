@@ -12,17 +12,22 @@ from datapr.renames import add_rename_candidates
 
 
 FIXTURES = Path(__file__).parent / "fixtures"
+GOLDEN = Path(__file__).parent / "golden"
+
+
+def _result():
+    base = load_manifest(FIXTURES / "base_manifest.json")
+    head = load_manifest(FIXTURES / "head_manifest.json")
+    result = compare(base, head)
+    result = add_sql_risk_findings(result, base, head)
+    result = add_rename_candidates(result, base, head)
+    result = add_column_lineage(result, head)
+    return apply_policy(result, PolicyConfig())
 
 
 class MeasurementTest(unittest.TestCase):
     def test_builds_aggregate_privacy_safe_measurement(self) -> None:
-        base = load_manifest(FIXTURES / "base_manifest.json")
-        head = load_manifest(FIXTURES / "head_manifest.json")
-        result = compare(base, head)
-        result = add_sql_risk_findings(result, base, head)
-        result = add_rename_candidates(result, base, head)
-        result = add_column_lineage(result, head)
-        result = apply_policy(result, PolicyConfig())
+        result = _result()
 
         measurement = build_measurement(result, 0.1234567)
         serialized = render_measurement(result, 0.1234567)
@@ -44,6 +49,10 @@ class MeasurementTest(unittest.TestCase):
             "select o.order_id",
         ):
             self.assertNotIn(sensitive.casefold(), serialized.casefold())
+
+    def test_json_matches_golden_measurement(self) -> None:
+        expected = (GOLDEN / "measurement-v1.json").read_text(encoding="utf-8")
+        self.assertEqual(expected, render_measurement(_result(), 0.1234567) + "\n")
 
     def test_clamps_negative_elapsed_time(self) -> None:
         base = load_manifest(FIXTURES / "base_manifest.json")
