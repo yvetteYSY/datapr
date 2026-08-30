@@ -112,7 +112,7 @@ For sampled data comparison, add `--base-data-dir` and `--head-data-dir`. Each d
 ## GitHub Action
 
 ```yaml
-- uses: yvetteYSY/datapr@main
+- uses: yvetteYSY/datapr@v0
   with:
     base-manifest: .datapr/base/manifest.json
     head-manifest: target/manifest.json
@@ -121,6 +121,8 @@ For sampled data comparison, add `--base-data-dir` and `--head-data-dir`. Each d
 ```
 
 The action posts or updates one PR comment, then enforces the configured decision. See the [complete GitHub Action guide](docs/github-action.md).
+
+Use the movable `v0` tag for backwards-compatible v0 updates, an exact release such as `v0.1.0` for reproducibility, or a full commit SHA for maximum supply-chain control.
 
 ## Dogfood example
 
