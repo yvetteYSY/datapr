@@ -12,3 +12,4 @@ dist/
 target/
 datapr-report.json
 datapr-report.md
+.datapr/

@@ -1,0 +1,36 @@
+{
+  "metadata": {"adapter_type": "bigquery"},
+  "nodes": {
+    "model.commerce.stg_orders": {
+      "resource_type": "model",
+      "name": "stg_orders",
+      "checksum": {"checksum": "stg-orders-v1"},
+      "compiled_code": "select order_id, customer_id, gross_amount from `raw.orders`",
+      "columns": {
+        "order_id": {"data_type": "int64"},
+        "customer_id": {"data_type": "int64"},
+        "gross_amount": {"data_type": "numeric"}
+      },
+      "depends_on": {"nodes": []}
+    },
+    "model.commerce.fct_orders": {
+      "resource_type": "model",
+      "name": "fct_orders",
+      "checksum": {"checksum": "fct-orders-v2"},
+      "compiled_code": "select order_id, cast(customer_id as string) as customer_id from `analytics.stg_orders`",
+      "columns": {
+        "order_id": {"data_type": "int64"},
+        "customer_id": {"data_type": "string"}
+      },
+      "depends_on": {"nodes": ["model.commerce.stg_orders"]}
+    },
+    "model.commerce.daily_revenue": {
+      "resource_type": "model",
+      "name": "daily_revenue",
+      "checksum": {"checksum": "daily-revenue-v1"},
+      "compiled_code": "select sum(gross_amount) as revenue from `analytics.fct_orders`",
+      "columns": {"revenue": {"data_type": "numeric"}},
+      "depends_on": {"nodes": ["model.commerce.fct_orders"]}
+    }
+  }
+}

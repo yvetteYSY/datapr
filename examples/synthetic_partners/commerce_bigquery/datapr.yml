@@ -1,0 +1,10 @@
+version: 1
+
+policies:
+  fail_on:
+    - model.removed
+    - schema.removed_column
+    - schema.incompatible_type_change
+  warn_on:
+    - model.modified
+  downstream_models: 1

@@ -129,6 +129,11 @@ Use the movable `v0` tag for backwards-compatible v0 updates, the exact `v0.4.0`
 
 [`examples/shop_analytics`](examples/shop_analytics) is a realistic, inspectable dbt-style project with a tracked manifest and bounded model output. The repository runs DataPR against this example on pull requests, extracting the comparison baseline directly from the target commit. See the [example walkthrough](examples/shop_analytics/README.md).
 
+For broader functional testing, [`examples/synthetic_partners`](examples/synthetic_partners)
+contains three explicitly fictional BigQuery, Snowflake, and Postgres acceptance
+scenarios. They verify functionality and privacy boundaries; they are not adopter
+evidence. See the [functional-test protocol](docs/synthetic-partner-prototypes.md).
+
 ## Finding trust
 
 Every finding is labeled `observed`, `derived`, or `inferred`, with a confidence value and explicit analysis coverage. Missing SQL, unsupported parsing, or absent sample pairs cannot silently become a clean result. See the [versioned result format](docs/result-format.md).

@@ -1,0 +1,10 @@
+version: 1
+
+policies:
+  fail_on:
+    - performance.filter_removed
+    - performance.cross_join_added
+    - performance.select_star_added
+  warn_on:
+    - model.modified
+  downstream_models: 1
