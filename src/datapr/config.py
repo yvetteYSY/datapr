@@ -22,6 +22,7 @@ class PolicyConfig:
     downstream_models: int = 10
     row_count_change_percent: float = 5.0
     null_rate_change_percent: float = 5.0
+    distribution_change_percent: float = 10.0
     fail_on_incomplete_coverage: bool = False
 
 
@@ -86,6 +87,12 @@ def load_config(path: str | Path | None) -> DataPRConfig:
         null_rate_change_percent=float(
             policies.get(
                 "null_rate_change_percent", defaults.null_rate_change_percent
+            )
+        ),
+        distribution_change_percent=float(
+            policies.get(
+                "distribution_change_percent",
+                defaults.distribution_change_percent,
             )
         ),
         fail_on_incomplete_coverage=bool(

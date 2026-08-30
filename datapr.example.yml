@@ -16,4 +16,5 @@ policies:
   downstream_models: 10
   row_count_change_percent: 5
   null_rate_change_percent: 5
+  distribution_change_percent: 10
   fail_on_incomplete_coverage: false

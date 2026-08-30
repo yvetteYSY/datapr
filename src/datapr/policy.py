@@ -31,6 +31,8 @@ def _finding_decision(finding: Finding, policy: PolicyConfig) -> str:
         >= policy.null_rate_change_percent
     ):
         return "warn"
+    if finding.id == "profile.distribution_changed":
+        return "warn"
     return "pass"
 
 

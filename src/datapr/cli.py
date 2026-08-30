@@ -12,6 +12,7 @@ from datapr.config import ConfigError, load_config
 from datapr.git import GitError, manifests_from_range
 from datapr.manifest import ManifestError, load_manifest
 from datapr.policy import apply_policy
+from datapr.profiler import ProfileError, add_profile_findings
 from datapr.render import render_json, render_markdown, render_text
 
 
@@ -36,6 +37,8 @@ def _parser() -> argparse.ArgumentParser:
     )
     comparison.add_argument("--repo", default=".", help="Git repository directory")
     comparison.add_argument("--config", help="path to datapr.yml")
+    comparison.add_argument("--base-data-dir")
+    comparison.add_argument("--head-data-dir")
     comparison.add_argument(
         "--format", choices=("text", "json", "markdown"), default="text"
     )
@@ -71,7 +74,18 @@ def main(argv: list[str] | None = None) -> int:
             raise GitError(
                 "provide BASE..HEAD or both --base-manifest and --head-manifest"
             )
-        result = apply_policy(compare(base, head), config.policy)
+        execution = config.execution
+        if args.base_data_dir or args.head_data_dir:
+            from dataclasses import replace
+
+            execution = replace(
+                execution,
+                base_data_dir=args.base_data_dir or execution.base_data_dir,
+                head_data_dir=args.head_data_dir or execution.head_data_dir,
+            )
+        result = compare(base, head)
+        result = add_profile_findings(result, execution, config.policy)
+        result = apply_policy(result, config.policy)
         if args.format == "json":
             output = render_json(result)
         elif args.format == "markdown":
@@ -83,7 +97,7 @@ def main(argv: list[str] | None = None) -> int:
         else:
             print(output)
         return 1 if args.enforce and result.decision == "fail" else 0
-    except (ConfigError, GitError, ManifestError) as exc:
+    except (ConfigError, GitError, ManifestError, ProfileError) as exc:
         print(f"datapr: {exc}", file=sys.stderr)
         return 2
 
