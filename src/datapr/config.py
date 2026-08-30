@@ -36,6 +36,8 @@ class PolicyConfig:
 @dataclass(frozen=True)
 class ExecutionConfig:
     sample_rows: int = 100_000
+    sample_strategy: str = "hash"
+    sample_seed: int = 0
     base_data_dir: str | None = None
     head_data_dir: str | None = None
 
@@ -108,13 +110,22 @@ def load_config(path: str | Path | None) -> DataPRConfig:
             )
         ),
     )
-    sample_rows = int(execution.get("sample_rows", 100_000))
+    try:
+        sample_rows = int(execution.get("sample_rows", 100_000))
+        sample_seed = int(execution.get("sample_seed", 0))
+    except (TypeError, ValueError) as exc:
+        raise ConfigError("execution sample_rows and sample_seed must be integers") from exc
     if sample_rows <= 0:
         raise ConfigError("execution.sample_rows must be positive")
+    sample_strategy = str(execution.get("sample_strategy", "hash")).casefold()
+    if sample_strategy not in {"hash", "first"}:
+        raise ConfigError("execution.sample_strategy must be 'hash' or 'first'")
     return DataPRConfig(
         policy=policy,
         execution=ExecutionConfig(
             sample_rows=sample_rows,
+            sample_strategy=sample_strategy,
+            sample_seed=sample_seed,
             base_data_dir=execution.get("base_data_dir"),
             head_data_dir=execution.get("head_data_dir"),
         ),

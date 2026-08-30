@@ -4,3 +4,4 @@ Architecture decision records preserve why consequential choices were made. They
 
 - [ADR-0001: Separate evidence from policy](0001-separate-evidence-from-policy.md)
 - [ADR-0002: Profile paired model outputs](0002-profile-paired-model-outputs.md)
+- [ADR-0003: Use deterministic content-hash sampling](0003-deterministic-content-sampling.md)

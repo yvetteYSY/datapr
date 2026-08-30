@@ -9,6 +9,9 @@ All notable changes to DataPR are documented here. The project uses semantic ver
 - conservative, non-blocking model rename candidates based on unique artifact fingerprints and declared schemas
 - conservative column rename candidates based on parsed projection expressions and declared types
 - rename-analysis coverage that records skipped ambiguity and parse failures
+- deterministic, input-order-independent content-hash sampling with a configurable seed
+- a legacy `first` sampling strategy for explicit v0.1 compatibility
+- reproducible 100, 1,000, and 10,000-model static-analysis benchmarks
 
 ## [0.1.0] - 2026-08-29
 

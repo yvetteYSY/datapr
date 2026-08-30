@@ -33,8 +33,8 @@ This roadmap prioritizes evidence that DataPR is useful in real pull-request wor
 
 ### Performance and reliability
 
-- Publish benchmarks for 100, 1,000, and 10,000-model manifests.
-- Add deterministic sampling before expanding distribution metrics.
+- [x] Publish reproducible benchmarks for 100, 1,000, and 10,000-model manifests.
+- [x] Add deterministic content-hash sampling before expanding distribution metrics.
 - Add resource limits and malformed-artifact stress tests.
 
 ### Release and adoption
