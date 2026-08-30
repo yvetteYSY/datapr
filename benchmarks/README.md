@@ -15,3 +15,5 @@ python -m benchmarks.manifest_scale \
 The benchmark uses a warmup followed by isolated wall-clock observations. The reported p95 uses the nearest-rank method. Results include runtime versions and non-identifying platform information so contributors can compare changes without treating one machine as universal.
 
 The checked-in [results](results.md) are a regression baseline. They are not a substitute for profiling adopter manifests with realistic SQL complexity and graph topology.
+
+Published-release rollout evidence is recorded separately. The [v0.4.0 maintainer pilot](v0.4.0-pilot.md) verifies immutable-tag resolution and clean-checkout integration mechanics against synthetic fixtures; it is not an independent-adopter benchmark.

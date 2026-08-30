@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 import unittest
 
@@ -44,6 +45,16 @@ class ReleaseTest(unittest.TestCase):
         self.assertIn('enforce: "false"', workflow)
         self.assertIn("timeout-minutes: 10", workflow)
         self.assertIn("retention-days: 14", workflow)
+
+    def test_pilot_measurement_is_privacy_safe_release_evidence(self) -> None:
+        path = ROOT / "benchmarks/v0.4.0-pilot-measurement.json"
+        measurement = json.loads(path.read_text(encoding="utf-8"))
+        serialized = json.dumps(measurement).casefold()
+        self.assertEqual("0.4.0", measurement["datapr_version"])
+        self.assertEqual("fail", measurement["decision"])
+        self.assertTrue(measurement["coverage"]["complete"])
+        for sensitive in ("orders", "customer_id", "base_manifest", "head_manifest"):
+            self.assertNotIn(sensitive, serialized)
 
 
 if __name__ == "__main__":

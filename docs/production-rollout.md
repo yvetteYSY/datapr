@@ -49,3 +49,5 @@ The movable `v0` tag provides no rollback guarantee by itself. Production reposi
 ## Maintainer pilot
 
 The manual [`Published release pilot`](../.github/workflows/release-pilot.yml) workflow starts its timer before checkout, invokes the public `v0.4.0` Action against synthetic fixtures, verifies the expected policy result, generates a privacy-safe measurement, and preserves both artifacts for 14 days. This proves release resolution and integration mechanics; it does not count as an independent adopter project or production precision evidence.
+
+The first [recorded v0.4.0 pilot](../benchmarks/v0.4.0-pilot.md) passed in a ten-second GitHub-hosted job. Checkout through verified report took no more than six seconds, while DataPR analysis took 0.001673 seconds with complete coverage and the expected failing policy decision.
