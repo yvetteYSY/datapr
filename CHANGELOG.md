@@ -4,6 +4,19 @@ All notable changes to DataPR are documented here. The project uses semantic ver
 
 ## [Unreleased]
 
+## [1.0.0rc1] - 2026-08-30
+
+### Added
+
+- an automated public-wheel upgrade rehearsal from v0.5.0 to the v1 candidate and rollback to v0.5.0, with exact comparison-contract equality checks
+- a bounded release-candidate pilot that validates exact-tag Action resolution, expected enforcement evidence, and privacy-safe candidate measurements
+- prerelease-aware GitHub publication that marks release-candidate tags without advancing the stable `v0` or future `v1` channels
+
+### Changed
+
+- mark the documented public v1 contract as the `v1.0.0rc1` compatibility candidate
+- promote package metadata from alpha to beta while retaining the separate, not-yet-production-proven status
+
 ### Fixed
 
 - clarify that exact semantic tags are immutable by project policy while GitHub's repository-level immutable-release enforcement is not enabled
@@ -91,7 +104,8 @@ All notable changes to DataPR are documented here. The project uses semantic ver
 - sampling uses a bounded first-row strategy in v0.1;
 - the Python package is not yet published to PyPI.
 
-[Unreleased]: https://github.com/yvetteYSY/datapr/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/yvetteYSY/datapr/compare/v1.0.0rc1...HEAD
+[1.0.0rc1]: https://github.com/yvetteYSY/datapr/releases/tag/v1.0.0rc1
 [0.5.0]: https://github.com/yvetteYSY/datapr/releases/tag/v0.5.0
 [0.4.0]: https://github.com/yvetteYSY/datapr/releases/tag/v0.4.0
 [0.3.0]: https://github.com/yvetteYSY/datapr/releases/tag/v0.3.0

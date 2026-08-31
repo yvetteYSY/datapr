@@ -20,9 +20,9 @@ orders  MODIFIED
 ```
 
 > [!IMPORTANT]
-> DataPR v0.5 begins the public v1 stabilization track. Its engineering contracts
-> are tested and release-ready; broader production-adoption evidence is still being
-> collected and is reported separately.
+> DataPR v1.0.0rc1 is the public v1 compatibility candidate. Use it for non-critical
+> testing; stable `v0` remains on v0.5.0. Broader production-adoption evidence is
+> still collected and reported separately.
 
 ## Why DataPR?
 
@@ -79,6 +79,17 @@ python -m pip install \
   https://github.com/yvetteYSY/datapr/releases/download/v0.5.0/datapr-0.5.0-py3-none-any.whl
 datapr --version
 ```
+
+Test the v1 release candidate without changing the stable `v0` channel:
+
+```bash
+python -m pip install \
+  https://github.com/yvetteYSY/datapr/releases/download/v1.0.0rc1/datapr-1.0.0rc1-py3-none-any.whl
+datapr --version
+```
+
+See the [v1 candidate upgrade and rollback guide](docs/v1-upgrade.md) before
+testing it in an existing project.
 
 For development from a source checkout:
 
@@ -138,6 +149,8 @@ The action posts or updates one PR comment, then enforces the configured decisio
 
 Use the movable `v0` tag for backwards-compatible v0 updates, the exact `v0.5.0`
 release for reproducibility, or a full commit SHA for maximum supply-chain control.
+Candidate testers must pin `v1.0.0rc1`; no movable `v1` tag exists before general
+availability.
 
 ## Dogfood example
 
@@ -168,7 +181,8 @@ DataPR is not a data catalog, orchestrator, or production observability platform
 
 The v0.1 MVP is complete; v0.2 added reproducible evidence, v0.3 trust
 hardening, v0.4 privacy-safe validation, and v0.5 public-contract and release
-stabilization. The [v1 stability policy](docs/v1-stability-policy.md) defines the
+stabilization. v1.0.0rc1 exercises that frozen contract through public upgrade and
+rollback. The [v1 stability policy](docs/v1-stability-policy.md) defines the
 compatibility commitment. Engineering progress and separate adoption evidence are
 tracked in the [roadmap](ROADMAP.md); technical decisions are detailed in the
 [system design](docs/design.md).

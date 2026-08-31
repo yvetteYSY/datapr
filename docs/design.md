@@ -1,6 +1,6 @@
 # DataPR: System Design
 
-- **Status:** v0.5 public-contract stabilization; production validation tracked separately
+- **Status:** v1.0.0rc1 compatibility candidate; production validation tracked separately
 - **Audience:** Contributors, adopters, and maintainers
 - **Last updated:** 2026-08-30
 

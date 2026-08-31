@@ -36,6 +36,8 @@ jobs:
           python -m pip install --force-reinstall dist/*.whl
           datapr --version
           datapr doctor tests/fixtures/head_manifest.json
+      - name: Rehearse v0.5 upgrade and rollback
+        run: python scripts/rehearse_upgrade.py --candidate-wheel dist/*.whl
       - uses: actions/upload-artifact@v6
         with:
           name: release-${{ github.ref_name }}
@@ -46,10 +48,16 @@ jobs:
         with:
           subject-path: "dist/*"
       - name: Publish GitHub release from exact semantic tag
+        shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
-        run: >-
-          gh release create "$GITHUB_REF_NAME" dist/*
-          --verify-tag
-          --title "DataPR $GITHUB_REF_NAME"
-          --notes-file "docs/releases/$GITHUB_REF_NAME.md"
+        run: |
+          release_flags=()
+          if [[ "$GITHUB_REF_NAME" == *rc* ]]; then
+            release_flags+=(--prerelease)
+          fi
+          gh release create "$GITHUB_REF_NAME" dist/* \
+            --verify-tag \
+            --title "DataPR $GITHUB_REF_NAME" \
+            --notes-file "docs/releases/$GITHUB_REF_NAME.md" \
+            "${release_flags[@]}"
