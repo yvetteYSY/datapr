@@ -71,7 +71,8 @@ Git diff + dbt manifests
 
 ## Quick start
 
-Install the public v0.5 wheel from the immutable GitHub release:
+Install the public v0.5 wheel from the GitHub release for the immutable `v0.5.0`
+tag:
 
 ```bash
 python -m pip install \
