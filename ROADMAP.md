@@ -40,7 +40,9 @@ to call it production-proven. Claims in documentation must preserve that boundar
 - [x] Provide a realistic dogfood example and three synthetic acceptance paths.
 - [x] Document security, resource limits, rollout, rollback, and compatibility.
 - [ ] Record a two-minute demo and add an accessible README preview.
-- [ ] Run a clean-room v1 release-candidate install using only public docs.
+- [x] Run a clean-room v1 release-candidate install using only public docs.
+  The [public RC pilot](https://github.com/yvetteYSY/datapr/actions/runs/33346482918)
+  validated the exact Action tag and release wheel on August 30, 2026.
 
 ## v1.0 engineering gate
 
