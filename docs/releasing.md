@@ -16,6 +16,10 @@ block v1 engineering readiness.
 8. Move the compatible major tag, currently `v0`, to the same commit.
 9. Run the published-release pilot and verify consumers can resolve both tags.
 
+Release-candidate versions use PEP 440 tags such as `v1.0.0rc1`. The release
+workflow marks tags containing `rc` as GitHub prereleases. Release candidates do
+not advance the stable movable `v0` tag or create the future `v1` tag.
+
 ## Tag policy
 
 - Semantic tags such as `v0.4.0` and `v0.5.0` identify exact releases and are never moved.

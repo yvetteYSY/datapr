@@ -67,4 +67,5 @@ DataPR recognizes `<model>.parquet`, `<model>.csv`, and `<model>.json`. Reports 
 - Do not expose warehouse secrets to untrusted fork workflows.
 - Generate bounded, redacted samples before invoking DataPR.
 - Use `v0` for backwards-compatible v0 updates, the immutable exact tag `v0.5.0`, or a full commit SHA for maximum supply-chain control.
+- Candidate testing must pin `v1.0.0rc1` with `enforce: "false"`; no movable `v1` tag exists before general availability.
 - Fork pull requests may receive a read-only `GITHUB_TOKEN`; DataPR still enforces analysis and emits a workflow report when it cannot write a PR comment.

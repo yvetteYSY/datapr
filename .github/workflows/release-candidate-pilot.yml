@@ -1,0 +1,74 @@
+name: Release candidate pilot
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  release-candidate-pilot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Start clean-checkout timer
+        id: start
+        shell: bash
+        run: echo "epoch=$(date +%s)" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Run v1 release candidate Action
+        id: datapr
+        uses: yvetteYSY/datapr@v1.0.0rc1
+        with:
+          base-manifest: tests/fixtures/base_manifest.json
+          head-manifest: tests/fixtures/head_manifest.json
+          enforce: "false"
+      - name: Verify candidate report and measurement
+        shell: bash
+        env:
+          DATAPR_EXIT_CODE: ${{ steps.datapr.outputs.exit-code }}
+          REPORT_PATH: ${{ steps.datapr.outputs.report-path }}
+          START_EPOCH: ${{ steps.start.outputs.epoch }}
+        run: |
+          test "$DATAPR_EXIT_CODE" = "1"
+          test -f "$REPORT_PATH"
+          grep -q "DataPR: FAIL" "$REPORT_PATH"
+          measurement_path="$RUNNER_TEMP/datapr-rc-measurement.json"
+          datapr measure \
+            --base-manifest tests/fixtures/base_manifest.json \
+            --head-manifest tests/fixtures/head_manifest.json \
+            --out "$measurement_path"
+          python -m json.tool "$measurement_path" >/dev/null
+          grep -q '"datapr_version": "1.0.0rc1"' "$measurement_path"
+          if grep -Eqi 'orders|customer_id|base_manifest|head_manifest' "$measurement_path"; then
+            echo "measurement contains a fixture identifier" >&2
+            exit 1
+          fi
+          elapsed_seconds=$(($(date +%s) - START_EPOCH))
+          {
+            echo "## DataPR v1.0.0rc1 release-candidate pilot"
+            echo
+            echo "- Clean-checkout time to verified report: ${elapsed_seconds}s"
+            echo "- Expected policy exit code observed: ${DATAPR_EXIT_CODE}"
+            echo "- Candidate measurement parsed successfully"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Clean-install public candidate wheel
+        shell: bash
+        run: |
+          python -m venv "$RUNNER_TEMP/datapr-rc-clean"
+          "$RUNNER_TEMP/datapr-rc-clean/bin/python" -m pip install \
+            https://github.com/yvetteYSY/datapr/releases/download/v1.0.0rc1/datapr-1.0.0rc1-py3-none-any.whl
+          test "$("$RUNNER_TEMP/datapr-rc-clean/bin/datapr" --version)" = "1.0.0rc1"
+          "$RUNNER_TEMP/datapr-rc-clean/bin/datapr" doctor \
+            tests/fixtures/head_manifest.json
+      - name: Preserve synthetic candidate evidence
+        uses: actions/upload-artifact@v6
+        with:
+          name: datapr-v1.0.0rc1-pilot-evidence
+          path: |
+            ${{ steps.datapr.outputs.report-path }}
+            ${{ runner.temp }}/datapr-rc-measurement.json
+          retention-days: 14

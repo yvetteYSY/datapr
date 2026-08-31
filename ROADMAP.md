@@ -15,7 +15,7 @@ to call it production-proven. Claims in documentation must preserve that boundar
 - reproducible scale benchmarks, release pilot, rollback runbook, and synthetic
   acceptance environments
 
-## Now: v0.5 v1 stabilization
+## Now: v1.0.0rc1 compatibility validation
 
 ### Public contract
 
@@ -23,7 +23,7 @@ to call it production-proven. Claims in documentation must preserve that boundar
 - [x] Preserve result schema 1 and measurement schema 1 golden contracts.
 - [x] Publish and validate configuration schema 1.
 - [x] Keep GitHub Action inputs and outputs backwards-compatible.
-- [ ] Complete a v1 release-candidate upgrade rehearsal from v0.5.
+- [x] Add a v1 release-candidate upgrade and rollback rehearsal from v0.5.
 
 ### Distribution and release
 

@@ -68,3 +68,5 @@ jobs:
           python -m pip install --force-reinstall dist/*.whl
           datapr --version
           datapr doctor tests/fixtures/head_manifest.json
+      - name: Rehearse v0.5 upgrade and rollback
+        run: python scripts/rehearse_upgrade.py --candidate-wheel dist/*.whl

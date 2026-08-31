@@ -1,5 +1,5 @@
 {
-  "status": "frozen-for-v1",
+  "status": "v1.0.0rc1",
   "cli": {
     "commands": ["doctor", "compare", "measure"],
     "global_options": ["--help", "--version"],

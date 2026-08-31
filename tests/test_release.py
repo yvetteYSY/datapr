@@ -19,20 +19,20 @@ class ReleaseTest(unittest.TestCase):
         self.assertIn("github-token", metadata["inputs"])
 
     def test_release_version_is_consistent(self) -> None:
-        self.assertEqual("0.5.0", __version__)
+        self.assertEqual("1.0.0rc1", __version__)
         changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
-        release_notes = (ROOT / "docs/releases/v0.5.0.md").read_text(
+        release_notes = (ROOT / "docs/releases/v1.0.0rc1.md").read_text(
             encoding="utf-8"
         )
         project = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
-        self.assertIn('version = "0.5.0"', project)
-        self.assertIn("## [0.5.0]", changelog)
-        self.assertIn("# DataPR v0.5.0", release_notes)
+        self.assertIn('version = "1.0.0rc1"', project)
+        self.assertIn("## [1.0.0rc1]", changelog)
+        self.assertIn("# DataPR v1.0.0rc1", release_notes)
 
     def test_release_verifier_accepts_current_tree(self) -> None:
         from scripts.verify_release import verify_release
 
-        self.assertEqual([], verify_release("v0.5.0"))
+        self.assertEqual([], verify_release("v1.0.0rc1"))
 
     def test_consumer_examples_use_release_tag(self) -> None:
         for path in (ROOT / "README.md", ROOT / "docs/github-action.md"):
@@ -59,6 +59,19 @@ class ReleaseTest(unittest.TestCase):
         self.assertIn("python -m twine check", workflow)
         self.assertIn("actions/attest-build-provenance@v3", workflow)
         self.assertIn('gh release create "$GITHUB_REF_NAME"', workflow)
+        self.assertIn("--prerelease", workflow)
+        self.assertIn("scripts/rehearse_upgrade.py", workflow)
+
+    def test_candidate_pilot_uses_exact_tag_and_bounded_permissions(self) -> None:
+        workflow = (
+            ROOT / ".github/workflows/release-candidate-pilot.yml"
+        ).read_text(encoding="utf-8")
+        self.assertIn("uses: yvetteYSY/datapr@v1.0.0rc1", workflow)
+        self.assertIn("contents: read", workflow)
+        self.assertIn("timeout-minutes: 10", workflow)
+        self.assertIn("retention-days: 14", workflow)
+        self.assertIn('"datapr_version": "1.0.0rc1"', workflow)
+        self.assertIn("datapr-1.0.0rc1-py3-none-any.whl", workflow)
 
     def test_pilot_measurement_is_privacy_safe_release_evidence(self) -> None:
         path = ROOT / "benchmarks/v0.4.0-pilot-measurement.json"
