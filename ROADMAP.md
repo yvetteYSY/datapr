@@ -29,7 +29,8 @@ to call it production-proven. Claims in documentation must preserve that boundar
 
 - [x] Build wheel and source distributions in protected CI.
 - [x] Inspect package metadata and install the built wheel before release.
-- [x] Automate immutable GitHub release creation and artifact provenance.
+- [x] Automate GitHub release creation from exact semantic tags and artifact
+  provenance.
 - [x] Document public installation from GitHub release assets.
 - [ ] Evaluate optional PyPI publication after trusted-publisher ownership is
   configured; PyPI does not block v1.

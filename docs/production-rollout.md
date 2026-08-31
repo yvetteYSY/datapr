@@ -23,7 +23,7 @@ production-proven; it does not block public versioning.
 
 ## Release promotion gates
 
-An immutable release and its compatible major tag may be published when:
+An exact semantic release and its compatible major tag may be published when:
 
 - the tagged commit is contained in protected `main`;
 - required Python, Action, package, schema, and functional-acceptance checks pass;

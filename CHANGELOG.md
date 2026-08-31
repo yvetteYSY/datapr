@@ -4,6 +4,10 @@ All notable changes to DataPR are documented here. The project uses semantic ver
 
 ## [Unreleased]
 
+### Fixed
+
+- clarify that exact semantic tags are immutable by project policy while GitHub's repository-level immutable-release enforcement is not enabled
+
 ## [0.5.0] - 2026-08-30
 
 ### Added
@@ -13,7 +17,7 @@ All notable changes to DataPR are documented here. The project uses semantic ver
 - three explicitly synthetic BigQuery, Snowflake, and Postgres functional prototypes with independent CI acceptance jobs
 - a documented v1 stability, support, exit-code, and compatibility policy
 - a versioned configuration JSON schema validated against the example configuration
-- automated source/wheel build verification, installation smoke tests, provenance attestation, and immutable GitHub release creation
+- automated source/wheel build verification, installation smoke tests, provenance attestation, and GitHub release creation from exact semantic tags
 
 ### Fixed
 
