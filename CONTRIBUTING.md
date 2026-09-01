@@ -11,6 +11,12 @@ python -m pip install --editable .
 python -m unittest discover -s tests -v
 ```
 
+Validate relative links in the root documentation and `docs/` tree with:
+
+```bash
+python scripts/check_markdown_links.py
+```
+
 ## Good first contributions
 
 Browse the [`good first issue`](https://github.com/yvetteYSY/datapr/labels/good%20first%20issue) queue for bounded tasks with acceptance criteria. Typical contributions include:
